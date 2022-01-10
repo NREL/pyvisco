@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 #import os
 import io
-import seaborn as sns
+#import seaborn as sns
 import zipfile
 import ipywidgets as widgets
 
