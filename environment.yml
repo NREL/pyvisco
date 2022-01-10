@@ -5,9 +5,7 @@ channels:
 dependencies:
   - numpy
   - matplotlib
-  - io
   - pandas
   - seaborn
-  - zipfile
   - ipywidgets
   - base64
