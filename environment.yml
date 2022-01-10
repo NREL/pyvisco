@@ -6,6 +6,6 @@ dependencies:
   - numpy
   - matplotlib
   - pandas
-  - seaborn
+  - scipy
   - ipywidgets
   - base64
