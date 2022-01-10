@@ -1,0 +1,9 @@
+numpy
+matplotlib
+os
+io
+seaborn
+zipfile
+ipwidgets
+ipympl
+voila
