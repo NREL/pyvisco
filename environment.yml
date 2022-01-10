@@ -1,6 +1,7 @@
 name: example-environment
 channels:
   - conda-forge
+  - default
 dependencies:
   - numpy
   - matplotlib
@@ -9,3 +10,4 @@ dependencies:
   - seaborn
   - zipfile
   - ipywidgets
+  - base64
