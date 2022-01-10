@@ -3,9 +3,9 @@ channels:
   - conda-forge
   - default
 dependencies:
-  - numpy
   - matplotlib
+  - numpy
   - pandas
   - scipy
+  - ipython
   - ipywidgets
-  - base64
