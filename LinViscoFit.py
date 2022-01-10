@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import os
+#import os
 import io
 import seaborn as sns
 import zipfile
@@ -907,7 +907,7 @@ def fig_bytes(fig):
 #-----------------------------------------------------------------------------
 def format_fig():
     #Set default colors
-    plt.rcParams['axes.prop_cycle'] = plt.cycler(color=sns.color_palette("colorblind")) #colorblind
+    #plt.rcParams['axes.prop_cycle'] = plt.cycler(color=sns.color_palette("colorblind")) #colorblind
 
     #Activate Grid
     plt.rcParams['axes.grid'] = True
