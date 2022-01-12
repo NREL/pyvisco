@@ -276,7 +276,7 @@ def df_shift_master(df_raw, df_aT, RefT):
 
     df_raw['f'] = np.flip(f_shift)
 
-    df_master = df_raw[["f", "E_stor", "E_loss", "E_comp", "tan_del"]].copy()
+    df_master = df_raw[["f", "E_stor", "E_loss", "E_comp", "tan_del", "Set"]].copy()
     df_master = df_master.sort_values(by=['f']).reset_index(drop=True)
     df_master.RefT = RefT
     df_master.domain = 'freq'
@@ -286,6 +286,55 @@ def df_shift_master(df_raw, df_aT, RefT):
     df_raw = df_raw.drop(['f'], axis=1)
 
     return df_master
+
+
+def plot_master_shift(df_raw, df_master):
+
+    if df_master.domain == 'freq':
+
+        fig, (ax1, ax2) = plt.subplots(1,2, figsize=(9,0.75*4.5))
+        ax1.set_xlabel('Frequency (Hz)')
+        ax1.set_ylabel('Storage modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax2.set_xlabel('Frequency (Hz)')
+        ax2.set_ylabel('Loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+
+        gb_raw = df_raw.groupby('Set')
+        gb_master = df_master.groupby('Set')
+        colors1 = np.flip(plt.cm.Blues(np.linspace(0,1,int(gb_raw.ngroups*1.25))),axis=0)
+        colors2 = np.flip(plt.cm.Oranges(np.linspace(0,1,int(gb_raw.ngroups*1.25))),axis=0)
+
+        for group, df_set in gb_master:
+            ax1.semilogx(df_set["f"], df_set["E_stor"], ls='', marker='.', color=colors1[int(group)])
+            ax2.semilogx(df_set["f"], df_set["E_loss"], ls='', marker='.', color=colors2[int(group)])
+        for group, df_set in gb_raw:
+            ax1.semilogx(df_set["f_set"], df_set["E_stor"], ls='', marker='.', color=colors1[int(group)])
+            ax2.semilogx(df_set["f_set"], df_set["E_loss"], ls='', marker='.', color=colors2[int(group)])
+
+        fig.show()
+        return fig
+
+    elif df_master.domain == 'time':
+        fig, ax1 = plt.subplots()
+        df_master.plot(x='f', y=['E_relax'], ax=ax1, logx=True)
+        ax1.set_xlabel('Time (s)')
+        ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        
+        gb = df_raw.groupby('Set')
+        colors1 = np.flip(plt.cm.Blues(np.linspace(0,1,32)),axis=0)
+
+        for group, df_set in gb:
+            ax1.semilogx(df_set["f_set"], df_set["E_relax"], ls='', marker='.', color=colors1[int(group)])
+
+
+        fig.show()
+        return fig
+
+
+
+
+
+
+
 
 
 
@@ -1009,6 +1058,8 @@ class Widgets():
             description='Type:',
             disabled=False,
             layout = widgets.Layout(height = _height, width = _width))
+        self.rb_type.observe(self.set_mastern, 'value')
+            
 
         self.rb_domain = widgets.RadioButtons(
             options=['freq', 'time'],
@@ -1104,8 +1155,9 @@ class Widgets():
                 
         #fit shift factors
         self.b_aT = widgets.Button(
-            description='(fit) & plot shift factors',
+            description='master raw data',
             button_style='info',
+            disabled = True,
             layout = widgets.Layout(height = _height, width = _width_b))
         self.b_aT.on_click(self.inter_aT)
 
@@ -1195,16 +1247,19 @@ class Widgets():
             self.up_shift],
             layout = widgets.Layout(width = '100%', justify_content='space-between'))
 
-        self.w_inp_load = widgets.HBox([
-            self.b_load,
-            self.out_load],
-            layout = widgets.Layout(width = '100%')) #, align_items='center'
+        #self.w_inp_load = widgets.HBox([
 
-        self.w_inp_check = widgets.HBox([
+        _load = widgets.HBox([
+            self.b_load,
             self.v_modulus,
             self.v_aT,
-            self.v_WLF],
+            self.v_WLF], 
             layout = widgets.Layout(width = '100%', justify_content='space-between'))
+            
+        self.w_inp_load = widgets.VBox([
+            _load,
+            self.out_load],
+            layout = widgets.Layout(width = '100%')) #, align_items='center'
 
         self.w_aT = widgets.VBox([
             widgets.HBox([self.b_aT, self.cb_aT]),
@@ -1248,8 +1303,13 @@ class GUIControl(Widgets):
             self.ft_RefT.value = self.RefT
 
 
+    def set_mastern(self, change):
+        if change['new'] == 'raw':
+            self.b_aT.disabled = False
+        else:
+            self.b_aT.disabled = True
 
-            
+           
         
     #Interactive functionality---------------------------------------------------------------------------------       
     def inter_load_master(self, b):
@@ -1296,7 +1356,8 @@ class GUIControl(Widgets):
             if isinstance(self.df_aT, pd.DataFrame):
                 self.files['df_aT'] = self.df_aT.to_csv(index = False)
                 self.v_aT.value = True
-                self.cb_aT.disabled = False
+                if isinstance(self.df_raw, pd.DataFrame):   
+                    self.cb_aT.disabled = False
             if isinstance(self.df_WLF, pd.DataFrame):
                 self.files['df_WLF'] = self.df_WLF.to_csv(index = False)
                 self.v_WLF.value = True
@@ -1308,9 +1369,9 @@ class GUIControl(Widgets):
         except IndexError:
             with self.out_load:
                 print('Upload files first!')
-        except ValueError:
-            with self.out_load:
-                print('Files not uploaded in required format!')
+        #except ValueError:
+        #    with self.out_load:
+        #        print('Files not uploaded in required format!')
 
 
     def inter_aT(self,b):
@@ -1322,6 +1383,14 @@ class GUIControl(Widgets):
 
                 self.files['df_master'] = self.df_master.to_csv(index = False)
                 self.files['df_aT'] = self.df_aT.to_csv(index = False)
+
+            try:
+                self.fig_master_shift = plot_master_shift(self.df_raw, self.df_master)
+                self.files['fig_master_shift'] = fig_bytes(self.fig_master_shift)
+            except NameError:
+                with self.out_aT:
+                    print('Raw and/or master dataframes are missing!')
+
         
                 
     def inter_shift(self, b):
