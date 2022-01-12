@@ -30,25 +30,38 @@ def load_Eplexor_raw(data):
     df = pd.read_excel(io.BytesIO(data), 'Exported Data', header=[0,1])
     df.columns = df.columns.droplevel(1)
     df.rename(columns={"f":"f_set", "E'":'E_stor', "E''":'E_loss', "|E*|":'E_comp',
-        "tan delta":'tan_del'}, inplace=True)
+        "tan delta":'tan_del'}, inplace=True, errors='raise')
 
 
     df_raw = df[['f_set', 'E_stor', 'E_loss', 'E_comp', 'tan_del', 'T']].copy()
     #df_raw['omega'] = 2*np.pi*df_raw['f']
     #df_raw['t'] = 1/df_raw['omega']
-    df_raw.domain = 'freq'
 
     df_raw = get_sets(df_raw, num=0)
     arr_RefT = df_raw.groupby('Set')['T'].mean().round()
     df_raw = df_raw.join(arr_RefT, on='Set', rsuffix='_round')
-
+    df_raw.domain = 'freq'
 
     return df_raw, arr_RefT
 
-def load_user_raw(workdir, filename):
-    #TODO: should this function be provided?
-    return None
 
+def load_user_raw(data, domain):
+    df_raw = pd.read_csv(io.BytesIO(data))
+
+    if domain == 'freq':
+        df_raw.rename(columns={"f":"f_set", "E_stor":'E_stor', 
+            "E_loss":'E_loss', "T":"T", 'Set':'Set'}, inplace=True, errors='raise')
+    elif domain == 'time':
+        df_raw.rename(columns={"t":"t_set", "E_relax":'E_relax', 
+            "T":"T", 'Set':'Set'}, inplace=True, errors='raise')
+        df_raw['f_set'] = 1/df_raw['t_set']
+
+    arr_RefT = df_raw.groupby('Set')['T'].mean().round()
+    df_raw = df_raw.join(arr_RefT, on='Set', rsuffix='_round')
+    df_raw.domain = domain
+    df_raw.domain = domain
+    
+    return df_raw, arr_RefT
 
 def load_Eplexor_master(data):
     df = pd.read_excel(io.BytesIO(data), 'Shiftlist',header=[0,1,2])
@@ -71,42 +84,43 @@ def load_Eplexor_master(data):
     #Prep Master curve data into df
     df_master_raw.columns = df_master_raw.columns.droplevel(1)
     df_master_raw.rename(columns={"E'":'E_stor', "E''":'E_loss', "|E*|":'E_comp',
-        "tan delta":'tan_del'}, inplace=True)
+        "tan delta":'tan_del'}, inplace=True, errors='raise')
 
     df_master = df_master_raw[['f', 'E_stor', 'E_loss', 'E_comp', 'tan_del']].copy()
     df_master['omega'] = 2*np.pi*df_master['f']
-    df_master['t'] = 1/df_master['omega']
+    df_master['t'] = 1/df_master['f']  
     df_master.RefT = RefT
     df_master.domain = 'freq'
 
     return df_master, df_aT, df_WLF
 
 
-def load_user_master(data, domain, RefT, data_shift = None):
+
+def load_user_master(data, domain, RefT):
     df_master = pd.read_csv(io.BytesIO(data))
 
     if domain == 'freq':
-        df_master.columns = ['f', 'E_stor', 'E_loss']
+        df_master.rename(columns = {'f':'f', 'E_stor':'E_stor', 
+            'E_loss':'E_loss'}, inplace=True, errors='raise')
         df_master['omega'] = 2*np.pi*df_master['f']
-        df_master['t'] = 1/df_master['omega']
+        df_master['t'] = 1/df_master['f'] 
     elif domain == 'time':
-        df_master.columns = ['t', 'E_relax']
-        df_master['omega'] = 1/df_master['t']
-        df_master['f'] = df_master['omega']/(2*np.pi)
-    else:
-        print('Error specify domain!')  #TODO: Include exception handling
+        df_master.rename(columns = {'t':'t', 'E_relax':'E_relax'}, 
+            inplace=True, errors='raise')
+        df_master['f'] = 1/df_master['t']
+        df_master['omega'] = 2*np.pi*df_master['f']
 
     df_master.RefT = RefT
     df_master.domain = domain
 
-    if data_shift:
-        df_aT = pd.read_csv(io.BytesIO(data_shift))
-        df_aT.columns = ['Temp', 'aT']
+    return df_master
 
-    else:
-        df_aT = None
+def load_user_shift(data_shift):
+    df_aT = pd.read_csv(io.BytesIO(data_shift))
+    df_aT.rename(columns = {'Temp':'Temp', 'aT':'aT'}, inplace=True, errors='raise')
 
-    return df_master, df_aT
+    return df_aT
+
 
 
 #Shift factors
@@ -145,15 +159,22 @@ def get_at_pwr(df, gb_ref, gb_shift, remove=False):
         low=0
         upp=None
 
+    if df.domain == 'freq':
+        _domain = 'f_set'
+        _modul = 'E_stor'
+    elif df.domain == 'time':
+        _domain = 'f_set'
+        _modul = 'E_relax'
+
     gb = df.groupby('Set')
 
-    refx = gb.get_group(gb_ref)["f_set"]
-    refy = gb.get_group(gb_ref)["E_stor"]
+    refx = gb.get_group(gb_ref)[_domain]
+    refy = gb.get_group(gb_ref)[_modul]
 
     refpopt, refpcov = curve_fit(log_func_pwr, refx[low:upp], refy[low:upp])
 
-    shiftx = gb.get_group(gb_shift)["f_set"]
-    shifty = gb.get_group(gb_shift)["E_stor"]
+    shiftx = gb.get_group(gb_shift)[_domain]
+    shifty = gb.get_group(gb_shift)[_modul]
 
     shiftpopt, shiftpcov = curve_fit(log_func_pwr, shiftx[low:upp], shifty[low:upp])
 
@@ -162,8 +183,8 @@ def get_at_pwr(df, gb_ref, gb_shift, remove=False):
     a2 = shiftpopt[0]
     b2 = shiftpopt[1]
 
-    xrefint = log_func_pwr(gb.get_group(gb_ref)["f_set"], *refpopt).min()
-    xshiftint = log_func_pwr(gb.get_group(gb_shift)["f_set"], *shiftpopt).max()
+    xrefint = log_func_pwr(gb.get_group(gb_ref)[_domain], *refpopt).min()
+    xshiftint = log_func_pwr(gb.get_group(gb_shift)[_domain], *shiftpopt).max()
 
     yint = (xrefint+xshiftint)/2
     refxi = (yint/a1)**(1/b1)
@@ -265,23 +286,38 @@ def get_shift_lin(df, RefT, remove=False):
 def df_shift_master(df_raw, df_aT, RefT):
 
     gb = df_raw.groupby('Set')
-    num_freq = int(df_raw.shape[0]/gb.ngroups)
+    _num = int(df_raw.shape[0]/gb.ngroups)
 
-    f_shift = np.array([])
-    set_index = np.array([])
+    _shift = np.array([])
 
     for index, rows in df_aT.iterrows():
-        f_shift = np.append(f_shift, np.flip(df_raw['f_set'][index*num_freq:(index+1)*num_freq].values*10**(rows['aT'])))
-        set_index = np.append(set_index, np.full(num_freq, index))
+        _shift = np.append(_shift, np.flip(df_raw['f_set'][index*_num:(index+1)*_num].values*10**(rows['aT'])))
 
-    df_raw['f'] = np.flip(f_shift)
+    df_raw['f'] = np.flip(_shift)
 
-    df_master = df_raw[["f", "E_stor", "E_loss", "E_comp", "tan_del", "Set"]].copy()
-    df_master = df_master.sort_values(by=['f']).reset_index(drop=True)
-    df_master.RefT = RefT
-    df_master.domain = 'freq'
-    df_master['omega'] = 2*np.pi*df_master['f']
-    df_master['t'] = 1/df_master['omega']
+    if df_raw.domain == 'freq':
+        df_master = df_raw[["f", "E_stor", "E_loss", "Set"]].copy()
+        if "E_comp" in df_raw:
+            df_master['E_comp'] = df_raw['E_comp']
+            df_master['tan_del'] = df_raw['tan_del']
+        df_master = df_master.sort_values(by=['f']).reset_index(drop=True)
+        df_master.RefT = RefT
+        df_master.domain = df_raw.domain
+        df_master['omega'] = 2*np.pi*df_master['f']
+        df_master['t'] = 1/df_master['f'] 
+
+        
+    elif df_raw.domain == 'time':
+        df_raw['t'] = 1/df_raw['f']
+
+        df_master = df_raw[["t", "E_relax", "Set"]].copy()
+        df_master = df_master.sort_values(by=['t']).reset_index(drop=True)
+        df_master.RefT = RefT
+        df_master.domain = df_raw.domain
+        df_master['f'] = 1/df_master['t']
+        df_master['omega'] = 2*np.pi*df_master['f'] 
+
+        df_raw = df_raw.drop(['t'], axis=1)
 
     df_raw = df_raw.drop(['f'], axis=1)
 
@@ -315,27 +351,21 @@ def plot_master_shift(df_raw, df_master):
 
     elif df_master.domain == 'time':
         fig, ax1 = plt.subplots()
-        df_master.plot(x='f', y=['E_relax'], ax=ax1, logx=True)
         ax1.set_xlabel('Time (s)')
         ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
         
-        gb = df_raw.groupby('Set')
-        colors1 = np.flip(plt.cm.Blues(np.linspace(0,1,32)),axis=0)
+        gb_raw = df_raw.groupby('Set')
+        gb_master = df_master.groupby('Set')
+        colors1 = np.flip(plt.cm.Blues(np.linspace(0,1,int(gb_raw.ngroups*1.25))),axis=0)
 
-        for group, df_set in gb:
-            ax1.semilogx(df_set["f_set"], df_set["E_relax"], ls='', marker='.', color=colors1[int(group)])
+        for group, df_set in gb_master:
+            ax1.semilogx(df_set["t"], df_set["E_relax"], ls='', marker='.', color=colors1[int(group)])
+        for group, df_set in gb_raw:
+            ax1.semilogx(df_set["t_set"], df_set["E_relax"], ls='', marker='.', color=colors1[int(group)])
 
 
         fig.show()
         return fig
-
-
-
-
-
-
-
-
 
 
 
@@ -351,7 +381,7 @@ def fit_shift_WLF(RefT, df_aT):
     xdata = df_aT['Temp'].values+273.15
     ydata = df_aT['aT'].values
 
-    popt, pcov = curve_fit(lambda x, C1, C2: WLF(x, RefT+273.15, C1, C2), xdata, ydata, p0 = [1E6, 1E6])
+    popt, pcov = curve_fit(lambda x, C1, C2: WLF(x, RefT+273.15, C1, C2), xdata, ydata, p0 = [1E3, 5E3], bounds=(0, 5000))
 
     #Put fitted WLF shift function in df
     df_WLF = pd.DataFrame(data = np.insert(popt,0,RefT)).T 
@@ -741,19 +771,21 @@ def calc_GenMaxw(E_0, df_terms, f_min, f_max, **kwargs):
 def plot_GMaxw(df_GMaxw):
 
     fig1, ax1 = plt.subplots()
-    df_GMaxw.plot(x='f', y=['E_stor', 'E_loss'], label=["E'", "E''"], ax=ax1, logx=True, ls='-', lw=2, color=['C0', 'C1'])
+    df_GMaxw.plot(x='f', y=['E_stor'], ax=ax1, logx=True, ls='-', lw=2, color=['C0'])
+    df_GMaxw.plot(x='f', y=['E_loss'], ax=ax1, logx=True, ls=':', lw=2, color=['C1'])
+    df_GMaxw.plot(x='f', y=['E_relax'], ax=ax1, logx=True, ls='--', lw=2, color=['C2'])
     ax1.set_xlabel('Frequency (Hz)')
-    ax1.set_ylabel('Storage and loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+    ax1.set_ylabel('Relaxation, storage and \n loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
     fig1.show()
     
 
-    fig2, ax2 = plt.subplots()
-    df_GMaxw.plot(x='t', y=['E_relax'], ax=ax2, logx=True, ls='-', lw=2, color=['C0'])
-    ax2.set_xlabel('Time (s)')
-    ax2.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
-    fig2.show()
+    #fig2, ax2 = plt.subplots()
+    #df_GMaxw.plot(x='t', y=['E_relax'], ax=ax2, logx=True, ls='-', lw=2, color=['C0'])
+    #ax2.set_xlabel('Time (s)')
+    #ax2.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+    #fig2.show()
 
-    return fig1, fig2
+    return fig1 #, fig2
 
 
 def plot_fit(df_master, df_GMaxw):
@@ -1051,6 +1083,7 @@ class Widgets():
             description='Instrument:',
             disabled=False,
             layout = widgets.Layout(height = _height, width = _width))
+        self.rb_eplexor.observe(self.set_ftype, 'value')
         
         self.rb_type = widgets.RadioButtons(
             options=['master', 'raw'],
@@ -1067,6 +1100,7 @@ class Widgets():
             description='Domain:',
             disabled=False,
             layout = widgets.Layout(height = _height, width = _width))
+        self.rb_domain.observe(self.set_instr, 'value')
         
         #Check box -------------------------------
         self.cb_shift = widgets.Checkbox(
@@ -1080,7 +1114,7 @@ class Widgets():
 
         self.cb_aT = widgets.Checkbox(
             value=False, 
-            description='fit and overwrite provided log(a_T)?',
+            description='fit and overwrite provided shift factors?',
             disabled=True,
             indent = True,
             layout = widgets.Layout(height = _height, width = _width),
@@ -1107,7 +1141,7 @@ class Widgets():
         
         #Upload buttons ---------------------------
         self.up_inp = widgets.FileUpload(
-            accept='.csv, .xls',
+            accept= '.xls, .xlsx',
             multiple=False,
             layout = widgets.Layout(height = _height, width = _width_b))
         
@@ -1272,10 +1306,6 @@ class Widgets():
         
 
 
-
-        
-
-
          
 class GUIControl(Widgets):
     """GUI Controls"""
@@ -1309,6 +1339,21 @@ class GUIControl(Widgets):
         else:
             self.b_aT.disabled = True
 
+    def set_ftype(self, change):
+        if change['new'] == 'Eplexor':
+            self.up_inp.accept='.xls, .xlsx'
+        elif change ['new'] == 'user':
+            self.up_inp.accept='.csv'
+
+    def set_instr(self, change):
+        if change['new'] == 'freq':
+            self.rb_eplexor.disabled = False
+        elif change ['new'] == 'time':
+            self.rb_eplexor.value = 'user'
+            self.rb_eplexor.disabled = True
+
+
+
            
         
     #Interactive functionality---------------------------------------------------------------------------------       
@@ -1320,7 +1365,17 @@ class GUIControl(Widgets):
             self.df_raw = None
             self.df_aT = None
             self.df_WLF = None
+            self.df_GMaxw = None
+            self.prony = None
+            self.v_modulus.value = False
+            self.v_aT.value = False
+            self.v_WLF.value = False
+            self.ft_RefT.disabled = False
+            self.cb_aT.disabled = True
+            self.cb_WLF.disabled = True
+            self.collect_files()
 
+            #Load modulus
             if self.rb_eplexor.value == 'Eplexor':
                 if self.rb_type.value == 'master':
                     self.df_master, self.df_aT, self.df_WLF  = load_Eplexor_master(self.up_inp.data[0])
@@ -1336,17 +1391,20 @@ class GUIControl(Widgets):
    
                 
             elif self.rb_eplexor.value == 'user':
-            
                 if self.rb_type.value == 'master':
-                    if self.cb_shift.value:
-                        self.df_master, self.df_aT = load_user_master(self.up_inp.data[0], self.rb_domain.value, self.RefT, self.up_shift.data[0])
-                    else:
-                        self.df_master, self.df_aT = load_user_master(self.up_inp.data[0], self.rb_domain.value, self.RefT, None)
-                
-                elif self.rb_type.value == 'raw':
-                    self.out_load('Not yet implemented!')
-                    pass
+                    self.df_master = load_user_master(self.up_inp.data[0], self.rb_domain.value, self.RefT)
 
+                elif self.rb_type.value == 'raw':
+                    self.df_raw, self.arr_RefT = load_user_raw(self.up_inp.data[0], self.rb_domain.value)
+                    _change = {}
+                    _change['new'] = self.ft_RefT.value
+                    self.set_RefT(_change)
+
+            #Load shift factors
+            if self.cb_shift.value:
+                self.df_aT = load_user_shift(self.up_shift.data[0])
+
+            #Add dataframes to zip package and adjust widgets
             if isinstance(self.df_master, pd.DataFrame):             
                 self.files['df_master'] = self.df_master.to_csv(index = False)
                 self.v_modulus.value = True
@@ -1366,12 +1424,15 @@ class GUIControl(Widgets):
             with self.out_load:
                 print('Upload successful!')
             
-        except IndexError:
-            with self.out_load:
-                print('Upload files first!')
-        #except ValueError:
+        #except IndexError:
         #    with self.out_load:
-        #        print('Files not uploaded in required format!')
+        #        print('Upload files first!')
+        except KeyError:
+            with self.out_load:
+                print('Column names not as expected. Check the headers in your input files!')
+        except ValueError:
+            with self.out_load:
+                print('Uploaded files not in required format!')
 
 
     def inter_aT(self,b):
@@ -1379,10 +1440,11 @@ class GUIControl(Widgets):
             clear_output()
             if not isinstance(self.df_aT, pd.DataFrame) or self.cb_aT.value:
                 self.df_aT = get_shift_pwr(self.df_raw, self.RefT)
-                self.df_master = df_shift_master(self.df_raw, self.df_aT, self.RefT)
 
-                self.files['df_master'] = self.df_master.to_csv(index = False)
-                self.files['df_aT'] = self.df_aT.to_csv(index = False)
+            self.df_master = df_shift_master(self.df_raw, self.df_aT, self.RefT)
+
+            self.files['df_master'] = self.df_master.to_csv(index = False)
+            self.files['df_aT'] = self.df_aT.to_csv(index = False)
 
             try:
                 self.fig_master_shift = plot_master_shift(self.df_raw, self.df_master)
@@ -1448,10 +1510,9 @@ class GUIControl(Widgets):
     def inter_GMaxw(self, b):
         with self.out_GMaxw:
             clear_output()
-            self.fig_GMaxw_freq, self.fig_GMaxw_time = plot_GMaxw(self.df_GMaxw)
+            self.fig_GMaxw = plot_GMaxw(self.df_GMaxw)
         
-        self.files['fig_GMaxw_freq'] = fig_bytes(self.fig_GMaxw_freq)
-        self.files['fig_GMaxw_time'] = fig_bytes(self.fig_GMaxw_time)
+        self.files['fig_GMaxw'] = fig_bytes(self.fig_GMaxw)
                 
        
     #Download functionality---------------------------------------------------------------------------------
