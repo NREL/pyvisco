@@ -493,6 +493,7 @@ def plot_smooth(df_master):
         df_master.plot(x='f', y=['E_loss_filt'], label=["E'(filt)"], ax=ax, logx=True, color=['C1'])
         ax.set_xlabel('Frequency (Hz)')
         ax.set_ylabel('Storage and loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax.legend()
 
         fig.show()
         return fig
@@ -501,33 +502,46 @@ def plot_smooth(df_master):
     elif df_master.domain == 'time':
         
         fig, ax1 = plt.subplots()
-        df_master.plot(x='t', y=['E_relax'], ax=ax1, logx=True, color=['gray'], marker='o', ls='')
-        df_master.plot(x='t', y=['E_relax_filt'], ax=ax1, logx=True, color=['r'])
+        df_master.plot(x='t', y=['E_relax'], label = ['E_relax'], ax=ax1, logx=True, ls='', marker='o', color=['gray'])
+        df_master.plot(x='t', y=['E_relax_filt'], label=['filter'], ax=ax1, logx=True, color=['r'])
         ax1.set_xlabel('Time (s)')                  #TODO: Make sure it makes sense to include units here...
         ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.legend()
 
         fig.show()
         return fig
 
 
-def discretize(df_master):
+def discretize(df_master, window='round', nprony=0):
     #Window Time Domain
+    
     if df_master.domain == 'freq':
         exp_inf = int(np.floor(np.log10(df_master['t'].iloc[0])))  #get highest time domain exponent
         exp_0 = int(np.ceil(np.log10(df_master['t'].iloc[-1])))    #get lowest time domain exponent
+        val_inf = df_master['t'].iloc[0]
+        val_0 = df_master['t'].iloc[-1]
 
     elif df_master.domain == 'time':
         exp_inf = int(np.floor(np.log10(df_master['t'].iloc[-1])))  #get highest time domain exponent
         exp_0 = int(np.ceil(np.log10(df_master['t'].iloc[0])))    #get lowest time domain exponent
+        val_inf = df_master['t'].iloc[-1]
+        val_0 = df_master['t'].iloc[0]
     
     #Space evenly on a log scale in time domain
-    nprony = exp_inf - exp_0 + 1 #one prony term per decade
-    tau = np.flip(np.geomspace(float(10**exp_0), float(10**exp_inf), nprony)) 
+    if nprony == 0:
+        nprony = exp_inf - exp_0 + 1 #one prony term per decade 
+
+    if window == 'round':
+        tau = np.flip(np.geomspace(float(10**exp_0), float(10**exp_inf), nprony)) 
+
+    elif window == 'exact':
+        tau = np.flip(np.geomspace(val_0, val_inf, nprony)) 
+
 
     #Space evenly in frequency domain [GUSTL]
     a = 1 #[Tschoegl 1989]
     omega_dis = (1/(a*tau)) #[Kraus 2017, Eq. 25]
-    freq_dis = omega_dis/(2*np.pi) #convert to cycles per second [Hz] and 
+    freq_dis = omega_dis/(2*np.pi) #convert to cycles per second [Hz] 
 
     if df_master.domain == 'freq':
 
@@ -597,9 +611,10 @@ def plot_dis(df_master, df_dis):
 
         fig, ax1 = plt.subplots()
         df_master.plot(x='f', y=['E_stor', 'E_loss'], ax=ax1, logx=True, color=['C0', 'C1'], alpha=0.5)
-        df_dis.plot(x='f', y=['E_stor', 'E_loss'], ax=ax1, logx=True, ls='', marker='o', color=['C0', 'C1'])
+        df_dis.plot(x='f', y=['E_stor', 'E_loss'], label=['tau_i', 'tau_i'], ax=ax1, logx=True, ls='', marker='o', color=['C0', 'C1'])
         ax1.set_xlabel('Frequency (Hz)')
         ax1.set_ylabel('Storage and loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.legend()
 
         fig.show()
         return fig
@@ -607,10 +622,11 @@ def plot_dis(df_master, df_dis):
     elif df_master.domain == 'time':
 
         fig, ax1 = plt.subplots()
-        df_master.plot(x='t', y=['E_relax'], ax=ax1, logx=True, color=['C0'])
-        df_dis.plot(x='tau', y=['E_relax'], ax=ax1, logx=True, ls='', marker='o', color=['C0'])
+        df_master.plot(x='t', y=['E_relax'], ax=ax1, logx=True, color=['k'])
+        df_dis.plot(x='tau', y=['E_relax'], label = ['tau_i'], ax=ax1, logx=True, ls='', marker='o', color=['red'])
         ax1.set_xlabel('Time (s)')
         ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.legend()
 
         fig.show()
         return fig
@@ -676,7 +692,6 @@ def fit_prony_freq(df_dis):
 def E_relax(time, alpha_i, tau_i, E_0):
     return E_0 * (1-np.dot(alpha_i, 1-np.exp(-time/tau_i[:,None])))
     
-
     #y = np.zeros(time.shape[0])
     #for i, t in enumerate(time):
     #    y[i] = E_0 * (1 - np.sum(alpha_i*(1-np.exp(-t/tau_i))))
@@ -684,7 +699,7 @@ def E_relax(time, alpha_i, tau_i, E_0):
 
 
 def residual(alpha_i, tau_i, E_0, E_relax_meas, time_meas):
-    return np.sum((E_relax_meas - E_relax(time_meas, alpha_i, tau_i, E_0))**2)
+    return np.sum((1 - E_relax(time_meas, alpha_i, tau_i, E_0)/E_relax_meas)**2)
 
 
 def fit_prony_time(df_dis, df_master):
@@ -797,6 +812,7 @@ def plot_fit(df_master, df_GMaxw):
         df_GMaxw.plot(x='f', y=['E_stor', 'E_loss'], ax=ax1, logx=True, ls='-', lw=2, color=['C0', 'C1'])
         ax1.set_xlabel('Frequency (Hz)')
         ax1.set_ylabel('Storage and loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.legend()
 
         fig.show()
         return fig
@@ -804,10 +820,11 @@ def plot_fit(df_master, df_GMaxw):
     if df_master.domain == 'time':
 
         fig, ax1 = plt.subplots()
-        df_master.plot(x='t', y=['E_relax'], ax=ax1, logx=True, color=['C0'], alpha=0.5, ls='', marker='o', markersize=3)
-        df_GMaxw.plot(x='t', y=['E_relax'], ax=ax1, logx=True, ls='-', lw=2, color=['C0'])
+        df_master.plot(x='t', y=['E_relax'], ax=ax1, logx=True, color=['gray'], ls='', marker='o', markersize=3)
+        df_GMaxw.plot(x='t', y=['E_relax'], label=['fit'], ax=ax1, logx=True, ls='-', lw=2, color=['r'])
         ax1.set_xlabel('Time (s)')
         ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.legend()
 
         fig.show()
         return fig
@@ -1065,6 +1082,7 @@ class Widgets():
 
     def ini_variables(self):
         self.RefT = 0
+        self.nprony = 0
 
     def widgets(self):
         """Define GUI widgets."""      
@@ -1093,7 +1111,6 @@ class Widgets():
             layout = widgets.Layout(height = _height, width = _width))
         self.rb_type.observe(self.set_mastern, 'value')
             
-
         self.rb_domain = widgets.RadioButtons(
             options=['freq', 'time'],
             value='freq', 
@@ -1101,6 +1118,23 @@ class Widgets():
             disabled=False,
             layout = widgets.Layout(height = _height, width = _width))
         self.rb_domain.observe(self.set_instr, 'value')
+
+        self.rb_dis = widgets.RadioButtons(
+            options=['default', 'manual'],
+            value='default', 
+            description='Discretization:',
+            disabled=False,
+            style = {'description_width' : 'initial'},
+            layout = widgets.Layout(height = _height, width = _width))
+        self.rb_dis.observe(self.set_dis, 'value')
+
+        self.rb_dis_win = widgets.RadioButtons(
+            options=['round', 'exact'],
+            value='round', 
+            description='Window:',
+            disabled=True,
+            layout = widgets.Layout(height = _height, width = _width))
+
         
         #Check box -------------------------------
         self.cb_shift = widgets.Checkbox(
@@ -1138,6 +1172,17 @@ class Widgets():
             layout = widgets.Layout(height = _height, width = '220px'),
             style = {'description_width' : 'initial'})
         self.ft_RefT.observe(self.set_RefT, 'value')
+
+        self.it_nprony = widgets.BoundedIntText(
+            value=self.nprony,
+            min = 0,
+            max = 1000,
+            step = 1,
+            description='Number of Prony terms:',
+            disabled=True,
+            layout = widgets.Layout(height = _height, width = '220px'),
+            style = {'description_width' : 'initial'})
+        #self.it_nprony.observe(self.set_nprony, 'value')
         
         #Upload buttons ---------------------------
         self.up_inp = widgets.FileUpload(
@@ -1202,6 +1247,7 @@ class Widgets():
         self.b_shift = widgets.Button(
             description='(fit) & plot shift functions',
             button_style='info',
+            disabled = True,
             layout = widgets.Layout(height = _height, width = _width_b))
         self.b_shift.on_click(self.inter_shift)
 
@@ -1238,7 +1284,7 @@ class Widgets():
         
         #Generalized Maxwell
         self.b_GMaxw = widgets.Button(
-            description='Plot Gen. Maxwell',
+            description='plot Generalized Maxwell',
             button_style='info',
             layout = widgets.Layout(height = _height, width = _width_b))
         self.b_GMaxw.on_click(self.inter_GMaxw)
@@ -1303,6 +1349,17 @@ class Widgets():
         self.w_shift = widgets.VBox([
             widgets.HBox([self.b_shift, self.cb_WLF]),
             self.out_shift])
+
+        _dis = widgets.HBox([
+            self.rb_dis, 
+            self.rb_dis_win, 
+            self.it_nprony],  
+            layout = widgets.Layout(width = '100%', justify_content='space-between'))
+
+        self.w_dis = widgets.VBox([
+            _dis,
+            self.b_dis,
+            self.out_dis])
         
 
 
@@ -1332,6 +1389,8 @@ class GUIControl(Widgets):
             self.RefT = self.arr_RefT.iloc[(self.arr_RefT-change['new']).abs().argsort()[:1]].values[0]
             self.ft_RefT.value = self.RefT
 
+    #def set_nprony(self, change):
+    #    self.nprony = change['new']
 
     def set_mastern(self, change):
         if change['new'] == 'raw':
@@ -1351,6 +1410,16 @@ class GUIControl(Widgets):
         elif change ['new'] == 'time':
             self.rb_eplexor.value = 'user'
             self.rb_eplexor.disabled = True
+
+    def set_dis(self, change):
+        if change['new'] == 'default':
+            self.rb_dis_win.disabled = True
+            self.it_nprony.disabled = True
+            self.it_nprony.value = 0
+        elif change['new'] == 'manual':
+            self.rb_dis_win.disabled = False
+            self.it_nprony.disabled = False
+
 
 
 
@@ -1373,6 +1442,7 @@ class GUIControl(Widgets):
             self.ft_RefT.disabled = False
             self.cb_aT.disabled = True
             self.cb_WLF.disabled = True
+            self.b_shift.disabled = True
             self.collect_files()
 
             #Load modulus
@@ -1414,6 +1484,7 @@ class GUIControl(Widgets):
             if isinstance(self.df_aT, pd.DataFrame):
                 self.files['df_aT'] = self.df_aT.to_csv(index = False)
                 self.v_aT.value = True
+                self.b_shift.disabled = False
                 if isinstance(self.df_raw, pd.DataFrame):   
                     self.cb_aT.disabled = False
             if isinstance(self.df_WLF, pd.DataFrame):
@@ -1445,6 +1516,7 @@ class GUIControl(Widgets):
 
             self.files['df_master'] = self.df_master.to_csv(index = False)
             self.files['df_aT'] = self.df_aT.to_csv(index = False)
+            self.b_shift.disabled = False
 
             try:
                 self.fig_master_shift = plot_master_shift(self.df_raw, self.df_master)
@@ -1483,11 +1555,12 @@ class GUIControl(Widgets):
                      win=widgets.IntSlider(min=1, max=20, step=1, value=1, continuous_update=False))
             
     def inter_dis(self, b):
-        self.df_dis = discretize(self.df_master)
+        self.df_dis = discretize(self.df_master, self.rb_dis_win.value, self.it_nprony.value)
         with self.out_dis:
             clear_output()
             self.fig_dis = plot_dis(self.df_master, self.df_dis)
         
+        self.it_nprony.value = self.df_dis.nprony
         self.files['df_dis'] = self.df_dis.to_csv()
         self.files['fig_dis'] = fig_bytes(self.fig_dis)
             
