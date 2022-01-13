@@ -516,14 +516,14 @@ def discretize(df_master, window='round', nprony=0):
     #Window Time Domain
     
     if df_master.domain == 'freq':
-        exp_inf = int(np.floor(np.log10(df_master['t'].iloc[0])))  #get highest time domain exponent
-        exp_0 = int(np.ceil(np.log10(df_master['t'].iloc[-1])))    #get lowest time domain exponent
-        val_inf = df_master['t'].iloc[0]
-        val_0 = df_master['t'].iloc[-1]
+        exp_inf = int(np.floor(np.log10((1/df_master['omega']).iloc[0])))  #get highest time domain exponent
+        exp_0 = int(np.ceil(np.log10((1/df_master['omega']).iloc[-1])))    #get lowest time domain exponent
+        val_inf = (1/df_master['omega']).iloc[0]
+        val_0 = (1/df_master['omega']).iloc[-1]
 
     elif df_master.domain == 'time':
-        exp_inf = int(np.floor(np.log10(df_master['t'].iloc[-1])))  #get highest time domain exponent
-        exp_0 = int(np.ceil(np.log10(df_master['t'].iloc[0])))    #get lowest time domain exponent
+        exp_inf = int(np.floor(np.log10((1/df_master['omega']).iloc[-1])))  #get highest time domain exponent
+        exp_0 = int(np.ceil(np.log10((1/df_master['omega']).iloc[0])))    #get lowest time domain exponent
         val_inf = df_master['t'].iloc[-1]
         val_0 = df_master['t'].iloc[0]
     
@@ -542,6 +542,8 @@ def discretize(df_master, window='round', nprony=0):
     a = 1 #[Tschoegl 1989]
     omega_dis = (1/(a*tau)) #[Kraus 2017, Eq. 25]
     freq_dis = omega_dis/(2*np.pi) #convert to cycles per second [Hz] 
+    t_dis = 1/freq_dis
+
 
     if df_master.domain == 'freq':
 
@@ -565,15 +567,15 @@ def discretize(df_master, window='round', nprony=0):
     elif df_master.domain == 'time':
     
         #Interpolate E_stor and E_loss at discretization poins
-        E_relax_dis = np.interp(tau, df_master['t'], df_master['E_relax_filt'])
+        E_relax_dis = np.interp(t_dis, df_master['t'], df_master['E_relax_filt'])
 
         #Estimate instantenous (E_0) and equilibrium (E_inf) modulus
         E_0 = df_master['E_relax_filt'].iloc[0]
         E_inf = df_master['E_relax_filt'].iloc[-1]
 
         #Assembly data frame
-        df_dis = pd.DataFrame([tau, E_relax_dis, omega_dis, freq_dis]).T
-        df_dis.columns = ['tau', 'E_relax', 'omega', 'f']
+        df_dis = pd.DataFrame([tau, t_dis, E_relax_dis, omega_dis, freq_dis]).T
+        df_dis.columns = ['tau', 't', 'E_relax', 'omega', 'f']
         df_dis.index += 1 
         df_dis.nprony = nprony
         df_dis.E_0 = E_0
@@ -623,7 +625,7 @@ def plot_dis(df_master, df_dis):
 
         fig, ax1 = plt.subplots()
         df_master.plot(x='t', y=['E_relax'], ax=ax1, logx=True, color=['k'])
-        df_dis.plot(x='tau', y=['E_relax'], label = ['tau_i'], ax=ax1, logx=True, ls='', marker='o', color=['red'])
+        df_dis.plot(x='t', y=['E_relax'], label = ['tau_i'], ax=ax1, logx=True, ls='', marker='o', color=['red'])
         ax1.set_xlabel('Time (s)')
         ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
         ax1.legend()
@@ -734,6 +736,9 @@ def fit_prony_time(df_dis, df_master):
     prony = {'E_0':E_0, 'df_terms':df_prony, 'f_min':f_min, 'f_max':f_max, 'label':'equi.'}
     
     return prony
+
+
+
 
 
 
