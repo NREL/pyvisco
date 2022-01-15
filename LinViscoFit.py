@@ -1734,6 +1734,7 @@ class GUIControl(Widgets):
                         continuous_update=False))
 
         with self.out_res:
+            clear_output()
             self.fig_res = plot_residual(self.N_opt_err)
             self.files['fig_res'] = fig_bytes(self.fig_res)
 
