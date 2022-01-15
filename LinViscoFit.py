@@ -1711,18 +1711,24 @@ class GUIControl(Widgets):
         self.files['fig_dis'] = fig_bytes(self.fig_dis)
             
     def inter_fit(self, b):
-        if self.rb_domain.value == 'freq':
-            self.prony = fit_prony_freq(self.df_dis)
-        elif self.rb_domain.value == 'time':
-            self.prony = fit_prony_time(self.df_dis, self.df_master)
-            
-        self.df_GMaxw = calc_GenMaxw(**self.prony)
-        
+        with self.out_prony:
+            clear_output()
         with self.out_fit:
+            clear_output()
+            display(self.w_loading)
+
+            if self.rb_domain.value == 'freq':
+                self.prony = fit_prony_freq(self.df_dis)
+            elif self.rb_domain.value == 'time':
+                self.prony = fit_prony_time(self.df_dis, self.df_master)
+                
+            self.df_GMaxw = calc_GenMaxw(**self.prony)
+        
             clear_output()
             self.fig_fit = plot_fit(self.df_master, self.df_GMaxw)
 
         with self.out_prony:
+            clear_output()
             print('E_0 = {:.2f} MPa'.format(self.prony['E_0']))
             print(self.prony['df_terms'][['tau', 'alpha']])
 
