@@ -328,7 +328,7 @@ def plot_master_shift(df_raw, df_master):
 
     if df_master.domain == 'freq':
 
-        fig, (ax1, ax2) = plt.subplots(1,2, figsize=(9,0.75*4.5))
+        fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
         ax1.set_xlabel('Frequency (Hz)')
         ax1.set_ylabel('Storage modulus (MPa)') #TODO: Make sure it makes sense to include units here...
         ax2.set_xlabel('Frequency (Hz)')
@@ -648,7 +648,7 @@ def plot_dis(df_master, df_dis):
 #Prony series - Frequency domain
 #-----------------------------------------------------------------------------
 
-def E_freq(omega, alpha_i, tau_i):
+def E_freq_norm(omega, alpha_i, tau_i):
     A = (omega*tau_i[:,None])
     A2 = A**2
     
@@ -659,7 +659,7 @@ def E_freq(omega, alpha_i, tau_i):
     return E_norm
 
 def res_freq(alpha_i, tau_i, E_freq_meas, omega_meas):
-    res = np.sum((E_freq_meas - E_freq(omega_meas, alpha_i, tau_i))**2)
+    res = np.sum((E_freq_meas - E_freq_norm(omega_meas, alpha_i, tau_i))**2)
     return res
 
 def opt_freq(x0, E_freq_meas, omega_meas):
@@ -739,36 +739,39 @@ def fit_prony_freq(df_dis, df_master=None, opt=False):
 #Prony series - Time domain
 #-----------------------------------------------------------------------------
 
-def E_relax(time, alpha_i, tau_i):
-    return (1-np.dot(alpha_i, 1-np.exp(-time/tau_i[:,None])))
+def E_relax_norm(time, alpha_i, tau_i):
+    return 1-np.sum(alpha_i) + np.dot(alpha_i, np.exp(-time/tau_i[:,None]))
+
+    #return (1-np.dot(alpha_i, 1-np.exp(-time/tau_i[:,None])))
     
     #y = np.zeros(time.shape[0])
     #for i, t in enumerate(time):
     #    y[i] = E_0 * (1 - np.sum(alpha_i*(1-np.exp(-t/tau_i))))
     #return y
 
-def res_time(alpha_i, tau_i, E_relax_meas, time_meas):
-    return np.sum((E_relax_meas - E_relax(time_meas, alpha_i, tau_i))**2)
+def res_time(alpha_i, tau_i, E_meas_norm, time_meas):
+    return np.sum((E_meas_norm - E_relax_norm(time_meas, alpha_i, tau_i))**2)
 
 
-def opt_time(x0, E_relax_meas, time_meas):
+def opt_time(x0, E_meas_norm, time_meas):
     alpha_i = x0[0:int(x0.shape[0]/2)]
     tau_i = x0[int(x0.shape[0]/2):]
-    return res_time(alpha_i, tau_i, E_relax_meas, time_meas)
+    return res_time(alpha_i, tau_i, E_meas_norm, time_meas)
 
 
 def fit_prony_time(df_dis, df_master, opt=False):
 
     alpha_i = np.ones(df_dis['tau'].values.shape) #start all a_i = 1
     tau_i = df_dis['tau'].values
-    E_0 = df_dis.E_0
-    E_relax_meas = df_master['E_relax_filt'].values / E_0
+
+    E_meas_norm = df_master['E_relax_filt'].values / df_dis.E_0
+
     time_meas = df_master['t'].values
     #N = df_dis.nprony
     bnd_a = ((0,1),)*alpha_i.shape[0]
 
-    res = minimize(res_time, alpha_i, args=(tau_i, E_relax_meas, time_meas), method='L-BFGS-B', bounds=bnd_a)
-    
+
+    res = minimize(res_time, alpha_i, args=(tau_i, E_meas_norm, time_meas), method='L-BFGS-B', bounds=bnd_a)
     alpha_i = res.x
 
     #use initial fit and try to optimize both alpha_i and tau_i
@@ -778,7 +781,8 @@ def fit_prony_time(df_dis, df_master, opt=False):
         tau_min = 1/(2*np.pi*df_dis.f_max)
         bnd_t = ((tau_min, tau_max),)*alpha_i.shape[0]
         bnd = bnd_a + bnd_t
-        res = minimize(opt_time, x0, args=(E_relax_meas, time_meas), method='L-BFGS-B' , bounds=bnd) 
+        res = minimize(opt_time, x0, args=(E_meas_norm, time_meas), method='L-BFGS-B' , bounds=bnd) 
+        print(res.success)
 
         alpha_i = res.x[0:int(res.x.shape[0]/2)]
         df_dis['tau'] = res.x[int(res.x.shape[0]/2):]
@@ -793,11 +797,11 @@ def fit_prony_time(df_dis, df_master, opt=False):
     df_prony = df_dis[['tau', 'alpha']].copy()
     df_prony = df_prony.iloc[::-1].reset_index(drop=True)
     df_prony.index += 1 
-    df_prony['E_0'] = E_0
-    df_prony['E_i'] = E_0 * df_prony['alpha']
+    df_prony['E_0'] = df_dis.E_0
+    df_prony['E_i'] = df_dis.E_0 * df_prony['alpha']
     df_prony.RefT = df_dis.RefT
 
-    prony = {'E_0':E_0, 'df_terms':df_prony, 'f_min':df_dis.f_min, 'f_max':df_dis.f_max, 'label':'equi.', 'err' : res.fun, 'decades':df_dis.decades}
+    prony = {'E_0':df_dis.E_0, 'df_terms':df_prony, 'f_min':df_dis.f_min, 'f_max':df_dis.f_max, 'label':'equi.', 'err' : res.fun, 'decades':df_dis.decades}
     
     return prony
 
@@ -843,7 +847,8 @@ def calc_GenMaxw(E_0, df_terms, f_min, f_max, decades, **kwargs):
     df_GMaxw['tan_del'] = df_GMaxw['E_loss']/df_GMaxw['E_stor']
 
     #Calculate time domain
-    df_GMaxw['E_relax'] = E_0 * E_relax(df_GMaxw['t'].values, alpha_i, tau_i)
+    df_GMaxw['E_relax'] =  E_0 * E_relax_norm(df_GMaxw['t'].values, alpha_i, tau_i)
+
 
     #for i, t in enumerate(df_GMaxw['t']):
     #    df_GMaxw['E_relax'][i] = E_0 * (1 - np.sum(alpha_i*(1-np.exp(-t/tau_i))))
@@ -905,15 +910,16 @@ def find_nprony(df_master, prony, window='min', err_opt = 0.025):
     dict_prony = {}
     nprony = prony['df_terms'].shape[0]
     
-    for i in range(nprony-2):
+    for i in range(1, nprony-2):
         N = nprony - i
-        df_dis = discretize(df_master, window, N)
-        if df_master.domain == 'time':
-            prony = fit_prony_time(df_dis, df_master, opt=True)
-        elif df_master.domain == 'freq':
-            prony = fit_prony_freq(df_dis, df_master, opt=True)
+        if not (N>20 and N%2 == 1): #above 20 Prony terms only compute every 2nd series
+            df_dis = discretize(df_master, window, N)
+            if df_master.domain == 'time':
+                prony = fit_prony_time(df_dis, df_master, opt=True)
+            elif df_master.domain == 'freq':
+                prony = fit_prony_freq(df_dis, df_master, opt=True)
 
-        dict_prony[N] = prony 
+            dict_prony[N] = prony 
         
     err = pd.DataFrame()
     for key, item in dict_prony.items():
@@ -1054,12 +1060,15 @@ def plot_fit_ANSYS(df_master, df_GMaxw, df_GMaxw_ANSYS):
         fig.show()
         return fig
 
-def plot_prony_coeff(prony_list):
+def plot_prony_coeff(prony_list, labels=None):
     df_list = []
-    for prony in prony_list:
+    for i, prony in enumerate(prony_list):
         df = prony['df_terms'][['tau', 'alpha']].copy()
         df = df.set_index('tau')
-        df.columns = [prony['label']]
+        if labels:
+            df.columns = [labels[i]]
+        else:
+            df.columns = [prony['label']]
         
         df_list.append(df)
 
@@ -1072,6 +1081,7 @@ def plot_prony_coeff(prony_list):
     ax1.set_xticklabels(xticklabels)
     ax1.set_xlabel(r'$\tau_i$')
     ax1.set_ylabel(r'$\alpha_i$')
+    ax1.legend()
 
     fig.show()
     return fig
@@ -1112,7 +1122,7 @@ def format_fig():
     plt.rcParams['axes.grid'] = True
 
     #Set default figure size to one column
-    plt.rcParams['figure.figsize'] = (4.5,0.75*4.5)
+    plt.rcParams['figure.figsize'] = (4,0.75*4)
 
     #Increase default resolution
     #plt.rcParams['figure.dpi'] = 600
@@ -1380,6 +1390,7 @@ class Widgets():
         self.b_fit.on_click(self.inter_fit)
 
         self.out_fit = widgets.Output()
+        self.out_prony = widgets.Output()
         
         self.out_html = widgets.Output()
         
@@ -1471,6 +1482,17 @@ class Widgets():
             _dis,
             self.b_dis,
             self.out_dis])
+
+        self.w_out_fit_prony = widgets.HBox([
+            self.out_fit, 
+            self.out_prony],  
+            layout = widgets.Layout(width = '100%')) #, justify_content='space-between'
+
+
+        self.w_out_fit_min = widgets.HBox([
+            self.out_opt,
+            self.out_res],  
+            layout = widgets.Layout(width = '100%', justify_content='space-between')) #
         
 
 
@@ -1699,7 +1721,11 @@ class GUIControl(Widgets):
         with self.out_fit:
             clear_output()
             self.fig_fit = plot_fit(self.df_master, self.df_GMaxw)
-                
+
+        with self.out_prony:
+            print('E_0 = {:.2f} MPa'.format(self.prony['E_0']))
+            print(self.prony['df_terms'][['tau', 'alpha']])
+
         self.files['fig_fit'] = fig_bytes(self.fig_fit)
         self.files['df_GMaxw'] = self.df_GMaxw.to_csv(index = False)
         self.files['df_prony'] = self.prony['df_terms'].to_csv(index_label = 'i')
@@ -1713,12 +1739,18 @@ class GUIControl(Widgets):
 
     def inter_opt_fig(self, N):
         self.df_GMaxw_opt, self.fig_opt = plot_nprony(self.df_master, self.dict_prony, N)
+        self.fig_coeff = plot_prony_coeff([self.prony, self.dict_prony[N]], ['initial', 'minimized'])
+
+
         self.files['df_prony_min'] = self.dict_prony[N]['df_terms'].to_csv(index_label = 'i')
         self.files['df_GMaxw_min'] = self.df_GMaxw_opt.to_csv(index = False)
         self.files['fig_fit_min'] = fig_bytes(self.fig_opt)
+        self.files['fig_coeff'] = fig_bytes(self.fig_coeff)
         
 
     def inter_opt(self, b):
+        with self.out_res:
+            clear_output()
         with self.out_opt:
             clear_output()
             display(self.w_loading)
@@ -1735,6 +1767,7 @@ class GUIControl(Widgets):
 
         with self.out_res:
             clear_output()
+            print()
             self.fig_res = plot_residual(self.N_opt_err)
             self.files['fig_res'] = fig_bytes(self.fig_res)
 
