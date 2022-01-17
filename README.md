@@ -10,7 +10,7 @@ The easiest way of using this code is through an interactive Jupyter notebook th
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/martin-springer/LinViscoFit/HEAD?urlpath=voila%2Frender%2FLinViscoFit.ipynb)
 
-Alternatively, all required functions are provided in `LinViscoFit.py`. Download the file, copy it into your working directory, and import the module in your Python code (`import LinViscoFit as visco`{.python}). The verification notebooks provided below showcase the usage of the module functions to perform the curve fitting procedure.
+Alternatively, all required functions are provided in `LinViscoFit.py`. Download the file, copy it into your working directory, and import the module in your Python code (`import LinViscoFit as visco`). The verification notebooks provided below showcase the usage of the module functions to perform the curve fitting procedure.
 
 ## Functionality
 A jupyter notebook is provided that allows for direct processing of the raw measurement data and the application of the time-temperature superposition principle to create a master curve for which the Prony series parameters are identified. Additionally, shift functions are fitted for the determined shift factors during creation of the master curve. Alternatively, prepared master curves can be uploaded and the shift procedure skipped to directly identify the Prony series pareameters for the provided master curve. An optional minimization routine is provided to minimize the number of Prony elements used in the Generalized Maxwell model. This routine is helpful for reducing the computational complexity of the linear viscoelastic material model when used in Finite Element simulations.
