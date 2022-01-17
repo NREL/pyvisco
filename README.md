@@ -1,5 +1,7 @@
 # Prony series identification for linear viscoelastic material models
 
+> Note: This repository is currently in development!
+
 Linear viscoelastic materials are often described with a Generalized Maxwell model. Herein, the experimental data need to be fitted to a Prony series expansion to determine the necessary model parameter. This python repository allows the Prony series parameter identificaiton from experimental data measured in either the frequency domain (via Dynamic Mechanical Thermal Analysis) or time domain (via relaxation measurements). A jupyter notebook is provided that allows for direct upload of the raw measurement data and the application of the time-temperature superposition principle to create a master curve for which the Prony series parameters are identified. Additionally, shift functions are fitted for the determined shift factors during creation of the master curve. Alternatively, prepared master curves can be uploaded and the shift procedure skipped to directly identify the Prony series pareameters for the provided master curve. An optional minimization routine is provided to minimize the number of Prony elements used in the Generalized Maxwell model. This routine is helpful for reducing the computational complexity of the linear viscoelastic material model when used in Finite Element simulations.
 
 An interactive version of the Jupyter notebook can be found here. 
