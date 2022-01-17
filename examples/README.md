@@ -1,3 +1,3 @@
-# Hello
+# Example input files
 
-Here will be some example input files for you.
+Here are some example input files that can be used in the provided interactive Jupyter notebook.
