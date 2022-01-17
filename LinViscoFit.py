@@ -19,7 +19,7 @@ from scipy.optimize import curve_fit
 from scipy.optimize import nnls
 from ipympl.backend_nbagg import Canvas
 from base64 import b64encode
-from IPython.display import display, clear_output, HTML
+from IPython.display import display, clear_output, HTML, Markdown
 
 def load_file(path):
     with open(path, 'rb') as file:  
@@ -1179,6 +1179,7 @@ class Widgets():
         self.widgets()
         self.layout()
         #self.show()
+        format_fig()
 
     def notebook_width(self):
         """Use full screen width for notebook."""
