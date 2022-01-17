@@ -47,6 +47,7 @@ def load_Eplexor_raw(data):
 
 def load_user_raw(data, domain):
     df_raw = pd.read_csv(io.BytesIO(data))
+    df_raw.columns = df_raw.columns.str.replace(' ', '')
 
     if domain == 'freq':
         df_raw.rename(columns={"f":"f_set", "E_stor":'E_stor', 
@@ -98,6 +99,7 @@ def load_Eplexor_master(data):
 
 def load_user_master(data, domain, RefT):
     df_master = pd.read_csv(io.BytesIO(data))
+    df_master.columns = df_master.columns.str.replace(' ', '')
 
     if domain == 'freq':
         df_master.rename(columns = {'f':'f', 'E_stor':'E_stor', 
