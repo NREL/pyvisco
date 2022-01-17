@@ -6,5 +6,5 @@ An interactive version of the notebook can be found here.
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/martin-springer/LinViscoFit/HEAD?urlpath=voila%2Frender%2FLinViscoFit.ipynb)
 
 The Python implementation has been verified by comparison of the obtained results with the curve fitting routine provided by ANSYS APDL 2020 R1. Jupyter notebooks showcasing this verification can be found below.
-[Example input files](examples) TBD!
+[Verification notebooks](verification) TBD!
 
