@@ -96,7 +96,6 @@ def load_Eplexor_master(data):
     return df_master, df_aT, df_WLF
 
 
-
 def load_user_master(data, domain, RefT):
     df_master = pd.read_csv(io.BytesIO(data))
     df_master.columns = df_master.columns.str.replace(' ', '')
@@ -122,7 +121,6 @@ def load_user_shift(data_shift):
     df_aT.rename(columns = {'Temp':'Temp', 'aT':'aT'}, inplace=True, errors='raise')
 
     return df_aT
-
 
 
 #Shift factors
