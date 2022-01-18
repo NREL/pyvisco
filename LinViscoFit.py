@@ -1196,6 +1196,7 @@ class Widgets():
         self.RefT = 0
         self.nprony = 0
 
+
     def widgets(self):
         """Define GUI widgets."""      
         
