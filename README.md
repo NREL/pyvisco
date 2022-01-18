@@ -3,7 +3,7 @@
 > Note: This repository is currently in development!
 
 ## Overview
-Linear viscoelastic materials are often described with a Generalized Maxwell model. The necessary model parameter are identified by fitting a Prony series to the experimental measurement data. 
+Linear viscoelastic materials are often described with a Generalized Maxwell model. The necessary model parameters are identified by fitting a Prony series to the experimental measurement data. 
 
 This Python repository allows for the identification of Prony series parameter from experimental data measured in either the frequency domain (via Dynamic Mechanical Thermal Analysis) or time domain (via relaxation measurements). The experimental data can be provided as raw measurement sets at different temperatures or as pre-processed master curves.
 
