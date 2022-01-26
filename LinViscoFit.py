@@ -951,6 +951,33 @@ def plot_residual(N_opt_err):
     return fig
 
 
+def plot_prony_coeff(prony_list, labels=None):
+    df_list = []
+    for i, prony in enumerate(prony_list):
+        df = prony['df_terms'][['tau', 'alpha']].copy()
+        df = df.set_index('tau')
+        if labels:
+            df.columns = [labels[i]]
+        else:
+            df.columns = [prony['label']]
+        
+        df_list.append(df)
+
+    df_bar = pd.concat(df_list, axis=1)
+
+    fig, ax1 = plt.subplots()
+    df_bar.plot.bar(ax=ax1)
+
+    xticklabels = [("{:.0e}".format(a)) for a in df_bar.index.tolist()]
+    ax1.set_xticklabels(xticklabels)
+    ax1.set_xlabel(r'$\tau_i$')
+    ax1.set_ylabel(r'$\alpha_i$')
+    ax1.legend()
+
+    fig.show()
+    return fig
+
+
 
 
 #Verification - Compare with ANSYS material fitting routine
@@ -1060,31 +1087,7 @@ def plot_fit_ANSYS(df_master, df_GMaxw, df_GMaxw_ANSYS):
         fig.show()
         return fig
 
-def plot_prony_coeff(prony_list, labels=None):
-    df_list = []
-    for i, prony in enumerate(prony_list):
-        df = prony['df_terms'][['tau', 'alpha']].copy()
-        df = df.set_index('tau')
-        if labels:
-            df.columns = [labels[i]]
-        else:
-            df.columns = [prony['label']]
-        
-        df_list.append(df)
 
-    df_bar = pd.concat(df_list, axis=1)
-
-    fig, ax1 = plt.subplots()
-    df_bar.plot.bar(ax=ax1)
-
-    xticklabels = [("{:.0e}".format(a)) for a in df_bar.index.tolist()]
-    ax1.set_xticklabels(xticklabels)
-    ax1.set_xlabel(r'$\tau_i$')
-    ax1.set_ylabel(r'$\alpha_i$')
-    ax1.legend()
-
-    fig.show()
-    return fig
 
 
 #Convenience functions
@@ -1110,6 +1113,9 @@ def fig_bytes(fig):
     buf = io.BytesIO()
     fig.savefig(buf, dpi = 600)
     return buf.getvalue()
+
+
+
 
 
 #Define figure style
@@ -1166,6 +1172,10 @@ def format_fig():
     Canvas.header_visible.default_value = False
     Canvas.footer_visible.default_value = False
     #Canvas.resizable.default_value = False
+
+
+
+
 
 
 
