@@ -8,7 +8,9 @@ Springer, (2015)](https://link.springer.com/book/10.1007/978-1-4899-7485-3). A b
 
 The rate-dependent material behavior can be described in either the time or frequency domain. In the time domain, the uniaxial, nonaging, isothermal stress-strain equation for a linear viscoelastic material can be represented by a Boltzmann superposition integral,
 
-$$ \sigma(t) = \int_0^t E(t-\tau) \frac{\mathrm{d \varepsilon(\tau)}}{\mathrm{d} \tau} \mathrm{d} \tau \quad , $$
+\begin{equation}
+\sigma(t) = \int_0^t E(t-\tau) \frac{\mathrm{d \varepsilon(\tau)}}{\mathrm{d} \tau} \mathrm{d} \tau \quad , 
+\end{equation}
 
 where $\sigma(t)$ is the stress response over time, $t$; $E(t)$ is the relaxation modulus; $\varepsilon$ denotes the strain; and $\tau$ is the integration variable. The limiting moduli for the viscoelastic material are defined as the instantaneous modulus, $E(t=0) = E_0$, and the equilibrium modulus, i.e., $E(t) \rightarrow E_{\infty}$ for $t \rightarrow \infty$. 
 
