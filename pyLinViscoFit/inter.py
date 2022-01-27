@@ -189,23 +189,23 @@ class Widgets():
             value=False,
             description='modulus data',
             continuous_update=True,
-            readout = '(N/P)', #string.whitespace
-            layout = widgets.Layout(height = _height, width = _width))
+            readout = '', #string.whitespace
+            layout = widgets.Layout(height = _height, width = _width_b))
 
         self.v_aT = widgets.Valid(
             value=False,
             description='shift factors',
             continuous_update=True,
-            readout = '(N/P)', #string.whitespace
-            layout = widgets.Layout(height = _height, width = _width))
+            readout = '', #string.whitespace
+            layout = widgets.Layout(height = _height, width = _width_b))
 
         self.v_WLF = widgets.Valid(
             value=False,
-            description='WLF shift func. (Eplexor master)',
+            description='WLF shift function',
             continuous_update=True,
-            readout = '(N/P)', #string.whitespace
+            readout = '', #string.whitespace
             style = {'description_width' : 'initial'},
-            layout = widgets.Layout(height = _height, width = _width))
+            layout = widgets.Layout(height = _height, width = _width_b))
     
         #Buttons and outputs ---------------------------------
 
@@ -270,7 +270,7 @@ class Widgets():
         #Prony fit
         self.b_fit = widgets.Button(
             description='fit Prony series',
-            button_style='danger',
+            button_style='info',
             layout = widgets.Layout(height = _height, width = _width_b))
         self.b_fit.on_click(self.inter_fit)
 
@@ -289,7 +289,7 @@ class Widgets():
         #Minimize nprony
         self.b_opt = widgets.Button(
             description='minimize Prony terms',
-            button_style='info',
+            button_style='warning',
             layout = widgets.Layout(height = _height, width = _width_b))
         self.b_opt.on_click(self.inter_opt)
         
@@ -310,7 +310,7 @@ class Widgets():
         
         self.db_zip = widgets.Button(
             description='Download zip',
-            button_style='warning',
+            button_style='success',
             layout = widgets.Layout(height = _height, width = _width_b))
         self.db_zip.on_click(self.down_zip)
 
@@ -335,14 +335,12 @@ class Widgets():
             self.up_shift],
             layout = widgets.Layout(width = '100%', justify_content='space-between'))
 
-        #self.w_inp_load = widgets.HBox([
-
         _load = widgets.HBox([
             self.b_load,
             self.v_modulus,
             self.v_aT,
             self.v_WLF], 
-            layout = widgets.Layout(width = '100%', justify_content='space-between'))
+            layout = widgets.Layout(width = '100%'))
             
         self.w_inp_load = widgets.VBox([
             _load,
@@ -533,9 +531,9 @@ class Control(Widgets):
             with self.out_load:
                 print('Upload successful!')
             
-        #except IndexError:
-        #    with self.out_load:
-        #        print('Upload files first!')
+        except IndexError:
+            with self.out_load:
+                print('Upload files first!')
         except KeyError:
             with self.out_load:
                 print('Column names not as expected. Check the headers in your input files!')

@@ -21,7 +21,7 @@ The easiest way of using this code is through an interactive Jupyter notebook th
 Alternatively, all required functions are provided in `LinViscoFit.py`. Download the file, copy it into your working directory, and import the module in your Python code (`import LinViscoFit as visco`). The verification notebooks provided below showcase the usage of the module functions to perform the curve fitting procedure.
 
 ## Verification
-The Python implementation has been verified by comparing the obtained results with the curve fitting routine implemented in the commercial software package ANSYS APDL 2020 R1. Jupyter notebooks showcasing this verification can be found here. [Verification notebooks](verification) TBD!
+The Python implementation has been verified by comparing the obtained results with the curve fitting routine implemented in the commercial software package ANSYS APDL 2020 R1. Jupyter notebooks and supplementary files can be found in the verification subfolder.
 
 ## Acknowledgements
 TBD...
