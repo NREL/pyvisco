@@ -95,8 +95,7 @@ def plot(df_aT, df_WLF, df_poly):
     ax.legend()
 
     fig.show()
-
-    
+  
     #Collect figure data in dataframe
     df_shift = pd.DataFrame(np.zeros((x.shape[0], 7)), 
         columns=(['T', 'log_aT', 'WLF', 'Poly1', 'Poly2', 'Poly3', 'Poly4']))

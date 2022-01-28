@@ -42,6 +42,9 @@ def format_fig():
     plt.rcParams['legend.fancybox'] = False
     plt.rcParams['legend.fontsize'] = 9
 
+    #Deactivate open figure warning
+    plt.rcParams.update({'figure.max_open_warning': 0})
+
     #Use constraint layout
     plt.rcParams['figure.constrained_layout.use'] = True
     #plt.rcParams['figure.constrained_layout.w_pad'] = 0.05
