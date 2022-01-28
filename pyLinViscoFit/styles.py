@@ -1,4 +1,5 @@
 from ipympl.backend_nbagg import Canvas
+from IPython.display import display, HTML
 import matplotlib.pyplot as plt
 
 #Define figure style
@@ -60,3 +61,28 @@ def format_fig():
     #Canvas.resizable.default_value = False
 
 
+def format_HTML(widget):
+    with widget:
+        display(HTML("""
+        <style>
+        .text_cell_render p {
+            text-align: justify;
+            text-justify: inter-word;
+        }
+        hr {
+            background-color: #1a1a1a;
+            border: none;
+            height: 1px;
+            margin: 1em 0;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        </style>
+        """
+        ))

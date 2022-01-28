@@ -56,6 +56,7 @@ class Widgets():
         self.layout()
         #self.show()
         styles.format_fig()
+        styles.format_HTML(self.out_html)
 
     def notebook_width(self):
         """Use full screen width for notebook."""
@@ -154,7 +155,7 @@ class Widgets():
         #Text field -------------------------------
         self.ft_RefT = widgets.FloatText(
             value=self.RefT,
-            description='Reference temperature (C):',
+            description='Reference temperature (\N{DEGREE SIGN}C):',
             disabled=False,
             layout = widgets.Layout(height = _height, width = '220px'),
             style = {'description_width' : 'initial'})
@@ -576,64 +577,84 @@ class Control(Widgets):
         self.files['df_shift_poly'] = self.df_poly.to_csv(index_label = 'Coeff.')
             
     def inter_smooth(self, win):
-        self.df_master = master.smooth(self.df_master, win)
-        self.fig_smooth = master.plot_smooth(self.df_master)
+        try:
+            self.df_master = master.smooth(self.df_master, win)
+            self.fig_smooth = master.plot_smooth(self.df_master)
         
-        self.files['df_master'] = self.df_master.to_csv(index = False)
-        self.files['fig_smooth'] = fig_bytes(self.fig_smooth)
+            self.files['df_master'] = self.df_master.to_csv(index = False)
+            self.files['fig_smooth'] = fig_bytes(self.fig_smooth)
+        except AttributeError:
+            print('Upload or create master curve!')
+
 
     def inter_smooth_fig(self, b):
         with self.out_smooth:
             clear_output()
             widgets.interact(self.inter_smooth, 
-                     win=widgets.IntSlider(min=1, max=20, step=1, value=1, 
-                        description = 'Window size:',
-                        style = {'description_width' : 'initial'},
-                        layout = widgets.Layout(height = 'auto', width = '300px'),
-                        continuous_update=False))
+                win=widgets.IntSlider(min=1, max=20, step=1, value=1, 
+                    description = 'Window size:',
+                    style = {'description_width' : 'initial'},
+                    layout = widgets.Layout(height = 'auto', width = '300px'),
+                    continuous_update=False))
+
             
     def inter_dis(self, b):
-        self.df_dis = prony.discretize(self.df_master, self.rb_dis_win.value, self.it_nprony.value)
         with self.out_dis:
             clear_output()
-            self.fig_dis = prony.plot_dis(self.df_master, self.df_dis)
-        
-        self.it_nprony.value = self.df_dis.nprony
-        self.files['df_dis'] = self.df_dis.to_csv()
-        self.files['fig_dis'] = fig_bytes(self.fig_dis)
+            try:
+                self.df_dis = prony.discretize(self.df_master, self.rb_dis_win.value, self.it_nprony.value)
+                self.fig_dis = prony.plot_dis(self.df_master, self.df_dis)
+                self.it_nprony.value = self.df_dis.nprony
+                self.files['df_dis'] = self.df_dis.to_csv()
+                self.files['fig_dis'] = fig_bytes(self.fig_dis)
+            except (AttributeError, KeyError):
+                  print('Smooth master curve before discretzation (win=1 for no filter).')
             
     def inter_fit(self, b):
         with self.out_prony:
             clear_output()
         with self.out_fit:
-            clear_output()
-            display(self.w_loading)
+            try:
+                #Display loading bar
+                clear_output()
+                display(self.w_loading)
 
-            if self.rb_domain.value == 'freq':
-                self.prony = prony.fit_freq(self.df_dis)
-            elif self.rb_domain.value == 'time':
-                self.prony = prony.fit_time(self.df_dis, self.df_master)
-                
-            self.df_GMaxw = prony.calc_GMaxw(**self.prony)
-        
-            clear_output()
-            self.fig_fit = prony.plot_fit(self.df_master, self.df_GMaxw)
+                #Perform curve fitting
+                if self.rb_domain.value == 'freq':
+                    self.prony = prony.fit_freq(self.df_dis)
+                elif self.rb_domain.value == 'time':
+                    self.prony = prony.fit_time(self.df_dis, self.df_master)
+                    
+                self.df_GMaxw = prony.calc_GMaxw(**self.prony)
+            
+                #Clear loading bar
+                clear_output()
+
+                #Display figure and store data
+                self.fig_fit = prony.plot_fit(self.df_master, self.df_GMaxw)
+                self.files['fig_fit'] = fig_bytes(self.fig_fit)
+                self.files['df_GMaxw'] = self.df_GMaxw.to_csv(index = False)
+                self.files['df_prony'] = self.prony['df_terms'].to_csv(index_label = 'i')
+            except AttributeError:
+                clear_output()
+                print('Discretization of master curve is missing!')
+                return
 
         with self.out_prony:
+            #Plot prony terms next to figure
             clear_output()
             print('E_0 = {:.2f} MPa'.format(self.prony['E_0']))
             print(self.prony['df_terms'][['tau', 'alpha']])
 
-        self.files['fig_fit'] = fig_bytes(self.fig_fit)
-        self.files['df_GMaxw'] = self.df_GMaxw.to_csv(index = False)
-        self.files['df_prony'] = self.prony['df_terms'].to_csv(index_label = 'i')
-        
     def inter_GMaxw(self, b):
         with self.out_GMaxw:
-            clear_output()
-            self.fig_GMaxw = prony.plot_GMaxw(self.df_GMaxw)
-        
-        self.files['fig_GMaxw'] = fig_bytes(self.fig_GMaxw)
+            try:
+                clear_output()
+                self.fig_GMaxw = prony.plot_GMaxw(self.df_GMaxw)
+                self.files['fig_GMaxw'] = fig_bytes(self.fig_GMaxw)
+            except AttributeError:
+                print('Prony series parameters are missing!')
+
 
     def inter_opt_fig(self, N):
         with self.out_opt:
@@ -657,8 +678,13 @@ class Control(Widgets):
         with self.out_opt:
             clear_output()
             display(self.w_loading)
-            self.dict_prony, self.N_opt, self.N_opt_err = opt.nprony(self.df_master, self.prony, window='min')
-            clear_output()
+            try:
+                self.dict_prony, self.N_opt, self.N_opt_err = opt.nprony(self.df_master, self.prony, window='min')
+                clear_output()
+            except (AttributeError, TypeError):
+                clear_output()
+                print('Initial Prony series fit is missing!')
+                return
         with self.out_dro:
             clear_output()
             widgets.interact(self.inter_opt_fig, 
@@ -698,8 +724,13 @@ class Control(Widgets):
         self.trigger_download(self.files['df_prony'], 'df_prony.csv', kind='text/plain')
         
     def down_zip(self, b):
-        zip_b64 = generate_zip(self.files)
-        self.trigger_download(zip_b64, 'fit.zip', kind='text/plain')
+        if len(self.files) == 0:
+            with self.out_html:
+                clear_output()
+                print('No files to download!')
+        else:
+            zip_b64 = generate_zip(self.files)
+            self.trigger_download(zip_b64, 'fit.zip', kind='text/plain')
 
     #Clear/refresh notebook---------------------------------------------------------------------------------
     def reload(self,b):
