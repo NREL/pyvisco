@@ -7,7 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from scipy.optimize import minimize, nnls
-from . import cython
+from . import cython as cy
 
 
 #Prony series - Frequency domain
@@ -125,7 +125,7 @@ def E_relax_norm(time, alpha_i, tau_i):
 
 def res_time(alpha_i, tau_i, E_meas_norm, time_meas):
     #try:
-    return np.sum((E_meas_norm - cython.cE_relax_norm.func(time_meas, alpha_i, tau_i))**2)
+    return np.sum((E_meas_norm - cy.E_relax_norm.func(time_meas, alpha_i, tau_i))**2)
     #except:
         #return np.sum((E_meas_norm - E_relax_norm(time_meas, alpha_i, tau_i))**2)
         
