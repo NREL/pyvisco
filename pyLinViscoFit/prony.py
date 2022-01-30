@@ -7,7 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from scipy.optimize import minimize, nnls
-from .cython import cE_relax_norm
+from cython import cE_relax_norm
 
 
 #Prony series - Frequency domain
