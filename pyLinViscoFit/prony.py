@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from scipy.optimize import minimize, nnls
+from .cython import cE_relax_norm
 
 
 #Prony series - Frequency domain
@@ -121,9 +122,13 @@ def E_relax_norm(time, alpha_i, tau_i):
     #    y[i] = E_0 * (1 - np.sum(alpha_i*(1-np.exp(-t/tau_i))))
     #return y
 
-def res_time(alpha_i, tau_i, E_meas_norm, time_meas):
-    return np.sum((E_meas_norm - E_relax_norm(time_meas, alpha_i, tau_i))**2)
 
+def res_time(alpha_i, tau_i, E_meas_norm, time_meas):
+    #try:
+    return np.sum((E_meas_norm - cE_relax_norm.func(time_meas, alpha_i, tau_i))**2)
+    #except:
+        #return np.sum((E_meas_norm - E_relax_norm(time_meas, alpha_i, tau_i))**2)
+        
 
 def opt_time(x0, E_meas_norm, time_meas):
     alpha_i = x0[0:int(x0.shape[0]/2)]
@@ -154,8 +159,10 @@ def fit_time(df_dis, df_master, opt=False):
         tau_min = 1/(2*np.pi*df_dis.f_max)
         bnd_t = ((tau_min, tau_max),)*alpha_i.shape[0]
         bnd = bnd_a + bnd_t
+
         res = minimize(opt_time, x0, args=(E_meas_norm, time_meas), 
             method='L-BFGS-B' , bounds=bnd) 
+
         if res.success:
             print('Prony series fit N = {:02d}: Succesful!'.format(alpha_i.shape[0]))
         else:
