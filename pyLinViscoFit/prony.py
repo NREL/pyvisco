@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from scipy.optimize import minimize, nnls
+from . import shift
 
 
 #Prony series - Frequency domain
@@ -187,6 +188,46 @@ def fit_time(df_dis, df_master, opt=False):
     return prony
 
 
+#Fit general
+#-----------------------------------------------------------------------------
+
+def fit(df_dis, df_master=None, opt=False):
+    if df_dis.domain == 'freq':
+        prony = fit_freq(df_dis, df_master, opt)
+    elif df_dis.domain == 'time':
+        prony = fit_time(df_dis, df_master)
+
+    df_GMaxw = calc_GMaxw(**prony)
+
+    return prony, df_GMaxw
+
+def plot_fit(df_master, df_GMaxw):
+
+    if df_master.domain == 'freq':
+
+        fig, ax1 = plt.subplots()
+        df_master.plot(x='f', y=['E_stor', 'E_loss'], ax=ax1, logx=True, color=['C0', 'C1'], alpha=0.5, ls='', marker='o', markersize=3)
+        df_GMaxw.plot(x='f', y=['E_stor', 'E_loss'], ax=ax1, logx=True, ls='-', lw=2, color=['C0', 'C1'])
+        ax1.set_xlabel('Frequency (Hz)')
+        ax1.set_ylabel('Storage and loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.legend()
+
+        fig.show()
+        return fig
+
+    elif df_master.domain == 'time':
+
+        fig, ax1 = plt.subplots()
+        df_master.plot(x='t', y=['E_relax'], ax=ax1, logx=True, color=['gray'], ls='', marker='o', markersize=3)
+        df_GMaxw.plot(x='t', y=['E_relax'], label=['fit'], ax=ax1, logx=True, ls='-', lw=2, color=['r'])
+        ax1.set_xlabel('Time (s)')
+        ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.legend()
+
+        fig.show()
+        return fig
+
+
 #Generalized Maxwell model
 #-----------------------------------------------------------------------------
 
@@ -346,48 +387,54 @@ def calc_GMaxw(E_0, df_terms, f_min, f_max, decades, **kwargs):
     return df_GMaxw
 
 
-def fit(df_dis, df_master=None, opt=False):
-    if df_dis.domain == 'freq':
-        prony = fit_freq(df_dis, df_master, opt)
-    elif df_dis.domain == 'time':
-        prony = fit_time(df_dis, df_master)
+def GMaxw_temp(shift_func, df_GMaxw, df_coeff, df_aT, freq = [1E-8, 1E-4, 1E0, 1E4]):
+    df_temp = pd.DataFrame()
 
-    df_GMaxw = calc_GMaxw(**prony)
+    T_min = int(df_aT['Temp'].min())
+    T_max = int(df_aT['Temp'].max())
 
-    return prony, df_GMaxw
+    for f in freq:
+        for T in range(T_min, T_max+1):
+            try:
+                if shift_func == 'WLF':
+                    coeff_WLF = df_coeff.values[0].tolist()
+                    aT = 10**(-shift.WLF(T, *coeff_WLF))
+                elif shift_func == 'D4':
+                    coeff_D4 = df_coeff['P4 (C)'].tolist()
+                    aT = 10**(-shift.poly4(T, *coeff_D4))
+                elif shift_func == 'D3':
+                    coeff_D3 = df_coeff['P3 (C)'].iloc[0:4].tolist()
+                    aT = 10**(-shift.poly3(T, *coeff_D3))
+                elif shift_func == 'D2':
+                    coeff_D2 = df_coeff['P2 (C)'].iloc[0:3].tolist()
+                    aT = 10**(-shift.poly2(T, *coeff_D2))
+                elif shift_func == 'D1':
+                    coeff_D1 = df_coeff['P1 (C)'].iloc[0:2].tolist()
+                    aT = 10**(-shift.poly1(T, *coeff_D1))
 
+                f_shift = aT * df_GMaxw['f']
 
+            except OverflowError:
+                continue
 
-def plot_fit(df_master, df_GMaxw):
-
-    if df_master.domain == 'freq':
-
-        fig, ax1 = plt.subplots()
-        df_master.plot(x='f', y=['E_stor', 'E_loss'], ax=ax1, logx=True, color=['C0', 'C1'], alpha=0.5, ls='', marker='o', markersize=3)
-        df_GMaxw.plot(x='f', y=['E_stor', 'E_loss'], ax=ax1, logx=True, ls='-', lw=2, color=['C0', 'C1'])
-        ax1.set_xlabel('Frequency (Hz)')
-        ax1.set_ylabel('Storage and loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
-        ax1.legend()
-
-        fig.show()
-        return fig
-
-    elif df_master.domain == 'time':
-
-        fig, ax1 = plt.subplots()
-        df_master.plot(x='t', y=['E_relax'], ax=ax1, logx=True, color=['gray'], ls='', marker='o', markersize=3)
-        df_GMaxw.plot(x='t', y=['E_relax'], label=['fit'], ax=ax1, logx=True, ls='-', lw=2, color=['r'])
-        ax1.set_xlabel('Time (s)')
-        ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
-        ax1.legend()
-
-        fig.show()
-        return fig
+            if any(f_shift<=f) and not all(f_shift<=f):
+                E_stor = np.interp(f, f_shift, df_GMaxw['E_stor'])
+                E_loss = np.interp(f, f_shift, df_GMaxw['E_loss'])
+                E_relax = np.interp(f, f_shift, df_GMaxw['E_relax'])
+                tan_del = np.interp(f, f_shift, df_GMaxw['tan_del'])
+                df = pd.DataFrame([[f, T, E_stor, E_loss, tan_del, E_relax]], 
+                                columns=['f', 'T', 'E_stor', 'E_loss', 'tan_del', 'E_relax'])
+                df_temp = df_temp.append(df)
+            else:
+                continue
+            
+    df_GMaxw_temp = df_temp.reset_index(drop=True)
+    return df_GMaxw_temp
 
 
 def plot_GMaxw(df_GMaxw):
 
-    fig1, ax1 = plt.subplots()
+    fig1, ax1 = plt.subplots() #figsize=(8,0.75*4)
     df_GMaxw.plot(x='f', y=['E_stor'], ax=ax1, logx=True, ls='-', lw=2, color=['C0'])
     df_GMaxw.plot(x='f', y=['E_loss'], ax=ax1, logx=True, ls=':', lw=2, color=['C1'])
     df_GMaxw.plot(x='f', y=['E_relax'], ax=ax1, logx=True, ls='--', lw=2, color=['C2'])
@@ -395,7 +442,6 @@ def plot_GMaxw(df_GMaxw):
     ax1.set_ylabel('Relaxation, storage and \n loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
     fig1.show()
     
-
     #fig2, ax2 = plt.subplots()
     #df_GMaxw.plot(x='t', y=['E_relax'], ax=ax2, logx=True, ls='-', lw=2, color=['C0'])
     #ax2.set_xlabel('Time (s)')
@@ -403,6 +449,24 @@ def plot_GMaxw(df_GMaxw):
     #fig2.show()
 
     return fig1 #, fig2
+    
+
+def plot_GMaxw_temp(df_temp):
+    fig, ax1 = plt.subplots()
+    for i, (f, df) in enumerate(df_temp.groupby('f')):
+        df.plot(y='E_stor', x='T', ls='-', ax=ax1, label='f = {:.0e} Hz'.format(f), c='C{}'.format(i))
+        df.plot(y='E_loss', x='T', ls=':', ax=ax1, label='', c='C{}'.format(i))
+
+        df.plot(y='E_relax', x='T', ls='--', ax=ax1, c='C{}'.format(i), label='') #label='t = {:.0e} s'.format(1/f)
+        
+    ax1.set_xlabel('Temperature (\N{DEGREE SIGN}C)')
+    ax1.set_ylabel('Relaxation, storage and \n loss modulus (MPa)')
+    ax1.legend()
+
+    fig.show()
+    return fig
+
+
 
 def plot_param(prony_list, labels=None):
     df_list = []

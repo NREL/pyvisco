@@ -285,7 +285,8 @@ class Widgets():
             layout = widgets.Layout(height = _height, width = _width_b))
         self.b_GMaxw.on_click(self.inter_GMaxw)
         
-        self.out_GMaxw = widgets.Output()
+        self.out_GMaxw_freq = widgets.Output()
+        self.out_GMaxw_temp = widgets.Output()
 
         #Minimize nprony
         self.b_opt = widgets.Button(
@@ -372,6 +373,13 @@ class Widgets():
             self.out_fit, 
             self.out_prony],  
             layout = widgets.Layout(width = '100%')) #, justify_content='space-between'
+
+
+        self.w_out_GMaxw = widgets.HBox([
+            self.out_GMaxw_freq, 
+            self.out_GMaxw_temp],  
+            layout = widgets.Layout(width = '100%')) #, justify_content='space-between'
+
 
 
         _minProny = widgets.HBox([
@@ -471,6 +479,7 @@ class Control(Widgets):
             self.df_raw = None
             self.df_aT = None
             self.df_WLF = None
+            self.df_poly = None
             self.df_GMaxw = None
             self.prony = None
             self.v_modulus.value = False
@@ -647,13 +656,23 @@ class Control(Widgets):
             print(self.prony['df_terms'][['tau', 'alpha']])
 
     def inter_GMaxw(self, b):
-        with self.out_GMaxw:
-            try:
+        try:
+            with self.out_GMaxw_freq:
                 clear_output()
                 self.fig_GMaxw = prony.plot_GMaxw(self.df_GMaxw)
                 self.files['fig_GMaxw'] = fig_bytes(self.fig_GMaxw)
-            except AttributeError:
-                print('Prony series parameters are missing!')
+
+            with self.out_GMaxw_temp:
+                clear_output()
+                if isinstance(self.df_WLF, pd.DataFrame):
+                    self.df_GMaxw_temp = prony.GMaxw_temp('WLF', self.df_GMaxw, self.df_WLF, self.df_aT)
+                    self.fig_GMaxw_temp = prony.plot_GMaxw_temp(self.df_GMaxw_temp)
+
+                    self.files['df_GMaxw_temp'] = self.df_GMaxw_temp.to_csv(index = False)
+                    self.files['fig_GMaxw_temp'] = fig_bytes(self.fig_GMaxw_temp)
+
+        except AttributeError:
+            print('Prony series parameters are missing!')
 
 
     def inter_opt_fig(self, N):
