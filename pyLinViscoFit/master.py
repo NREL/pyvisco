@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import warnings
 
 from scipy.optimize import curve_fit
 
@@ -52,26 +53,27 @@ def fit_at_pwr(df_raw, gb_ref, gb_shift):
     shift_xdata = gb.get_group(gb_shift)['f_set']
     shift_ydata = gb.get_group(gb_shift)[_modul]
 
-    #Curve fit power law
-    ref_popt, ref_pcov = curve_fit(pwr_y, ref_xdata, ref_ydata, maxfev=10000)
-    shift_popt, shift_pcov = curve_fit(pwr_y, shift_xdata, shift_ydata, maxfev=10000)
+    with warnings.catch_warnings():
+        #Curve fit power law
+        ref_popt, ref_pcov = curve_fit(pwr_y, ref_xdata, ref_ydata, maxfev=10000)
+        shift_popt, shift_pcov = curve_fit(pwr_y, shift_xdata, shift_ydata, maxfev=10000)
 
-    #Check and remove first measurement point if outlier
-    ref_popt_rem, ref_pcov_rem = curve_fit(pwr_y, ref_xdata[1:], ref_ydata[1:], maxfev=10000)
-    perr = np.sqrt(np.abs(np.diag(ref_pcov)))
-    perr_rem = np.sqrt(np.abs(np.diag(ref_pcov_rem)))
-    if all(perr_rem < perr):
-        ref_popt = ref_popt_rem
-        ref_xdata = ref_xdata[1:] 
-        ref_ydata = ref_ydata[1:]
+        #Check and remove first measurement point if outlier
+        ref_popt_rem, ref_pcov_rem = curve_fit(pwr_y, ref_xdata[1:], ref_ydata[1:], maxfev=10000)
+        perr = np.sqrt(np.abs(np.diag(ref_pcov)))
+        perr_rem = np.sqrt(np.abs(np.diag(ref_pcov_rem)))
+        if all(perr_rem < perr):
+            ref_popt = ref_popt_rem
+            ref_xdata = ref_xdata[1:] 
+            ref_ydata = ref_ydata[1:]
 
-    shift_popt_rem, shift_pcov_rem = curve_fit(pwr_y, shift_xdata[1:], shift_ydata[1:], maxfev=10000)
-    perr = np.sqrt(np.abs(np.diag(shift_pcov)))
-    perr_rem = np.sqrt(np.abs(np.diag(shift_pcov_rem)))
-    if all(perr_rem < perr):
-        shift_popt = shift_popt_rem
-        shift_xdata = shift_xdata[1:] 
-        shift_ydata = shift_ydata[1:]
+        shift_popt_rem, shift_pcov_rem = curve_fit(pwr_y, shift_xdata[1:], shift_ydata[1:], maxfev=10000)
+        perr = np.sqrt(np.abs(np.diag(shift_pcov)))
+        perr_rem = np.sqrt(np.abs(np.diag(shift_pcov_rem)))
+        if all(perr_rem < perr):
+            shift_popt = shift_popt_rem
+            shift_xdata = shift_xdata[1:] 
+            shift_ydata = shift_ydata[1:]
 
     #Calculate fit
     ref_ydata_fit = pwr_y(ref_xdata, *ref_popt)
