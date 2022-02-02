@@ -37,18 +37,25 @@ def file(path):
         data = file.read() 
     return data
 
-def Eplexor_raw(data):
+def Eplexor_raw(data, modul):
     """Load raw measurement data from the Eplexor software. The columns are 
     renamed and the individual measurements at different temperatures are
     grouped based on the frequency data.
     """
-    df = pd.read_excel(io.BytesIO(data), 'Exported Data', header=[0,1])
+    df = pd.read_excel(io.BytesIO(data), 'Exported Data', header=[0,1], na_values='---')
+    df.dropna(inplace=True)
     df.columns = df.columns.droplevel(1)
-    df.rename(columns={"f":"f_set", "E'":'E_stor', "E''":'E_loss', 
-        "|E*|":'E_comp', "tan delta":'tan_del'}, inplace=True, errors='raise')
 
-
-    df_raw = df[['f_set', 'E_stor', 'E_loss', 'E_comp', 'tan_del', 'T']].copy()
+    df.rename(columns={"f":"f_set", 
+        "{}'".format(modul)  :'{}_stor'.format(modul), 
+        "{}''".format(modul) :'{}_loss'.format(modul), 
+        "|{}*|".format(modul):'{}_comp'.format(modul), 
+        "tan delta":'tan_del'}, inplace=True, errors='raise')
+    df_raw = df[['f_set', 
+        '{}_stor'.format(modul), 
+        '{}_loss'.format(modul), 
+        '{}_comp'.format(modul), 
+        'tan_del', 'T']].copy()
     #df_raw['omega'] = 2*np.pi*df_raw['f']
     #df_raw['t'] = 1/df_raw['omega']
 
@@ -56,43 +63,49 @@ def Eplexor_raw(data):
     arr_RefT = df_raw.groupby('Set')['T'].mean().round()
     df_raw = df_raw.join(arr_RefT, on='Set', rsuffix='_round')
     df_raw.domain = 'freq'
+    df_raw.modul = modul
 
     return df_raw, arr_RefT
 
 
-def user_raw(data, domain):
+def user_raw(data, domain, modul):
     """Load raw measurement data from user instrument. The columns are 
     renamed and the individual measurements at different temperatures are
     grouped based on user data.
     """
     df_raw = pd.read_csv(io.BytesIO(data))
+    df_raw.dropna(inplace=True)
     df_raw.columns = df_raw.columns.str.replace(' ', '')
 
     if domain == 'freq':
-        df_raw.rename(columns={"f":"f_set", "E_stor":'E_stor', 
-            "E_loss":'E_loss', "T":"T", 'Set':'Set'}, 
+        df_raw.rename(columns={"f":"f_set", 
+            "{}_stor".format(modul):'{}_stor'.format(modul), 
+            "{}_loss".format(modul):'{}_loss'.format(modul), 
+            "T":"T", 'Set':'Set'}, 
             inplace=True, errors='raise')
     elif domain == 'time':
-        df_raw.rename(columns={"t":"t_set", "E_relax":'E_relax', 
+        df_raw.rename(columns={"t":"t_set", 
+            "{}_relax".format(modul):'{}_relax'.format(modul), 
             "T":"T", 'Set':'Set'}, inplace=True, errors='raise')
         df_raw['f_set'] = 1/df_raw['t_set']
 
     arr_RefT = df_raw.groupby('Set')['T'].mean().round()
     df_raw = df_raw.join(arr_RefT, on='Set', rsuffix='_round')
     df_raw.domain = domain
-    df_raw.domain = domain
+    df_raw.modul = modul
     
     return df_raw, arr_RefT
 
 
-def Eplexor_master(data):
+def Eplexor_master(data, modul):
     """Load master curve data from the Eplexor software. The columns are 
     renamed and the shift factors as well as the WLF shift function parameters 
     are extracted from the excel file.
     """
     df = pd.read_excel(io.BytesIO(data), 'Shiftlist',header=[0,1,2])
     df_master_raw = pd.read_excel(io.BytesIO(data), 'Exported Data', 
-        header=[0,1])
+        header=[0,1], na_values='---')
+    df_master_raw.dropna(inplace=True)
 
     #Prep Shift factors into df
     RefT = float(df.columns.values[1][0][:-3])
@@ -110,39 +123,51 @@ def Eplexor_master(data):
 
     #Prep Master curve data into df
     df_master_raw.columns = df_master_raw.columns.droplevel(1)
-    df_master_raw.rename(columns={"E'":'E_stor', "E''":'E_loss', 
-        "|E*|":'E_comp', "tan delta":'tan_del'}, inplace=True, errors='raise')
+    df_master_raw.rename(columns={
+        "{}'".format(modul):'{}_stor'.format(modul), 
+        "{}''".format(modul):'{}_loss'.format(modul), 
+        "|{}*|".format(modul):'{}_comp'.format(modul), 
+        "tan delta":'tan_del'}, inplace=True, errors='raise')
 
-    df_master = df_master_raw[['f', 'E_stor', 'E_loss', 'E_comp', 
+    df_master = df_master_raw[['f', 
+        '{}_stor'.format(modul), 
+        '{}_loss'.format(modul), 
+        '{}_comp'.format(modul), 
         'tan_del']].copy()
     df_master['omega'] = 2*np.pi*df_master['f']
     df_master['t'] = 1/df_master['f']  
     df_master.RefT = RefT
     df_master.domain = 'freq'
+    df_master.modul = modul
 
     return df_master, df_aT, df_WLF
 
 
-def user_master(data, domain, RefT):
+def user_master(data, domain, RefT, modul):
     """Load master curve data from user instrument. The columns are 
     renamed and additional time and frequency quantities calculated.
     """
     df_master = pd.read_csv(io.BytesIO(data))
+    df_master.dropna(inplace=True)
     df_master.columns = df_master.columns.str.replace(' ', '')
 
     if domain == 'freq':
-        df_master.rename(columns = {'f':'f', 'E_stor':'E_stor', 
-            'E_loss':'E_loss'}, inplace=True, errors='raise')
+        df_master.rename(columns = {'f':'f', 
+            '{}_stor'.format(modul):'{}_stor'.format(modul), 
+            '{}_loss'.format(modul):'{}_loss'.format(modul)}, 
+            inplace=True, errors='raise')
         df_master['omega'] = 2*np.pi*df_master['f']
         df_master['t'] = 1/df_master['f'] 
     elif domain == 'time':
-        df_master.rename(columns = {'t':'t', 'E_relax':'E_relax'}, 
+        df_master.rename(columns = {'t':'t', 
+            '{}_relax'.format(modul):'{}_relax'.format(modul)}, 
             inplace=True, errors='raise')
         df_master['f'] = 1/df_master['t']
         df_master['omega'] = 2*np.pi*df_master['f']
 
     df_master.RefT = RefT
     df_master.domain = domain
+    df_master.modul = modul
 
     return df_master
 

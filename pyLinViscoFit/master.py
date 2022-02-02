@@ -11,7 +11,8 @@ def plot(df_master):
     if df_master.domain == 'freq':
 
         fig, ax1 = plt.subplots()
-        df_master.plot(x='f', y=['E_stor', 'E_loss'], ax=ax1, logx=True)
+        df_master.plot(x='f', 
+            y=['{}_stor'.format(df_master.modul), '{}_loss'.format(df_master.modul)], ax=ax1, logx=True)
         ax1.set_xlabel('Frequency (Hz)')
         ax1.set_ylabel('Storage and loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
 
@@ -20,7 +21,7 @@ def plot(df_master):
 
     elif df_master.domain == 'time':
         fig, ax1 = plt.subplots()
-        df_master.plot(x='f', y=['E_relax'], ax=ax1, logx=True)
+        df_master.plot(x='f', y=['{}_relax'.format(df_master.modul)], ax=ax1, logx=True)
         ax1.set_xlabel('Time (s)')
         ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
 
@@ -40,10 +41,11 @@ def pwr_x(y, a, b, e):
     return ((y-e)/a)**(1/b)
 
 def fit_at_pwr(df_raw, gb_ref, gb_shift):
+    m = df_raw.modul
     if df_raw.domain == 'freq':
-        _modul = 'E_stor'
+        _modul = '{}_stor'.format(m)
     elif df_raw.domain == 'time':
-        _modul = 'E_relax'
+        _modul = '{}_relax'.format(m)
 
     gb = df_raw.groupby('Set')
 
@@ -145,6 +147,7 @@ def get_aT(df_raw, RefT):
 
 
 def get_curve(df_raw, df_aT, RefT):
+    m = df_raw.modul
     df_shift = pd.DataFrame() 
     for S, df in df_raw.groupby('Set'):  
         aT = 10**(df_aT[df_aT['Temp'] == df['T_round'].iloc[0]]['log_aT'].values)
@@ -152,23 +155,28 @@ def get_curve(df_raw, df_aT, RefT):
         df_shift = df_shift.append(fshift.to_frame())
 
     if df_raw.domain == 'freq':
-        df_master = df_raw[["E_stor", "E_loss", "Set"]].copy()
+        df_master = df_raw[[
+            "{}_stor".format(m), 
+            "{}_loss".format(m), 
+            "Set"]].copy()
         df_master['f'] = df_shift
-        if "E_comp" in df_raw:
-            df_master['E_comp'] = df_raw['E_comp']
+        if "{}_comp".format(m) in df_raw:
+            df_master['{}_comp'.format(m)] = df_raw['{}_comp'.format(m)]
             df_master['tan_del'] = df_raw['tan_del']
         df_master = df_master.sort_values(by=['f']).reset_index(drop=True)
         df_master.RefT = RefT
         df_master.domain = df_raw.domain
+        df_master.modul = m
         df_master['omega'] = 2*np.pi*df_master['f']
         df_master['t'] = 1/df_master['f'] 
 
     elif df_raw.domain == 'time':
-        df_master = df_raw[["E_relax", "Set"]].copy()
+        df_master = df_raw[["{}_relax".format(m), "Set"]].copy()
         df_master['t'] = 1/df_shift
         df_master = df_master.sort_values(by=['t']).reset_index(drop=True)
         df_master.RefT = RefT
         df_master.domain = df_raw.domain
+        df_master.modul = m
         df_master['f'] = 1/df_master['t']
         df_master['omega'] = 2*np.pi*df_master['f'] 
 
@@ -176,7 +184,7 @@ def get_curve(df_raw, df_aT, RefT):
 
 
 def plot_shift(df_raw, df_master):
-
+    m = df_raw.modul
     if df_master.domain == 'freq':
 
         fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
@@ -191,11 +199,11 @@ def plot_shift(df_raw, df_master):
         colors2 = np.flip(plt.cm.Oranges(np.linspace(0,1,int(gb_raw.ngroups*1.25))),axis=0)
 
         for group, df_set in gb_master:
-            ax1.semilogx(df_set["f"], df_set["E_stor"], ls='', marker='.', color=colors1[int(group)])
-            ax2.semilogx(df_set["f"], df_set["E_loss"], ls='', marker='.', color=colors2[int(group)])
+            ax1.semilogx(df_set["f"], df_set["{}_stor".format(m)], ls='', marker='.', color=colors1[int(group)])
+            ax2.semilogx(df_set["f"], df_set["{}_loss".format(m)], ls='', marker='.', color=colors2[int(group)])
         for group, df_set in gb_raw:
-            ax1.semilogx(df_set["f_set"], df_set["E_stor"], ls='', marker='.', color=colors1[int(group)])
-            ax2.semilogx(df_set["f_set"], df_set["E_loss"], ls='', marker='.', color=colors2[int(group)])
+            ax1.semilogx(df_set["f_set"], df_set["{}_stor".format(m)], ls='', marker='.', color=colors1[int(group)])
+            ax2.semilogx(df_set["f_set"], df_set["{}_loss".format(m)], ls='', marker='.', color=colors2[int(group)])
 
         fig.show()
         return fig
@@ -210,37 +218,39 @@ def plot_shift(df_raw, df_master):
         colors1 = np.flip(plt.cm.Blues(np.linspace(0,1,int(gb_raw.ngroups*1.25))),axis=0)
 
         for group, df_set in gb_master:
-            ax1.semilogx(df_set["t"], df_set["E_relax"], ls='', marker='.', color=colors1[int(group)])
+            ax1.semilogx(df_set["t"], df_set["{}_relax".format(m)], ls='', marker='.', color=colors1[int(group)])
         for group, df_set in gb_raw:
-            ax1.semilogx(df_set["t_set"], df_set["E_relax"], ls='', marker='.', color=colors1[int(group)])
+            ax1.semilogx(df_set["t_set"], df_set["{}_relax".format(m)], ls='', marker='.', color=colors1[int(group)])
 
 
         fig.show()
         return fig
 
-
 def smooth(df_master, win):
+    m = df_master.modul
     if df_master.domain == 'freq':
-        df_master["E_stor_filt"] = df_master["E_stor"].rolling(win, center=True, min_periods=1).median()
-        df_master["E_loss_filt"] = df_master["E_loss"].rolling(win, center=True, min_periods=1).median()
+        df_master["{}_stor_filt".format(m)] = df_master[
+            "{}_stor".format(m)].rolling(win, center=True, min_periods=1).median()
+        df_master["{}_loss_filt".format(m)] = df_master[
+            "{}_loss".format(m)].rolling(win, center=True, min_periods=1).median()
 
     elif df_master.domain == 'time':
-        df_master["E_relax_filt"] = df_master["E_relax"].rolling(win, center=True, min_periods=1).median()
+        df_master["{}_relax_filt".format(m)] = df_master[
+            "{}_relax".format(m)].rolling(win, center=True, min_periods=1).median()
 
     return df_master
 
-
 def plot_smooth(df_master):
+    m = df_master.modul
     if df_master.domain == 'freq':
-
         fig, ax = plt.subplots()
-        df_master.plot(x='f', y=['E_stor'], label=["E'(raw)"], 
+        df_master.plot(x='f', y=['{}_stor'.format(m)], label=["{}'(raw)".format(m)], 
             ax=ax, logx=True, color=['C0'], marker='o', ls='', alpha=0.5)
-        df_master.plot(x='f', y=['E_stor_filt'], label=["E'(filt)"], 
+        df_master.plot(x='f', y=['{}_stor_filt'.format(m)], label=["{}'(filt)".format(m)], 
             ax=ax, logx=True, color=['C0'])
-        df_master.plot(x='f', y=['E_loss'], label=["E''(raw)"], 
+        df_master.plot(x='f', y=['{}_loss'.format(m)], label=["{}''(raw)".format(m)], 
             ax=ax, logx=True, color=['C1'], marker='o', ls='', alpha=0.5)
-        df_master.plot(x='f', y=['E_loss_filt'], label=["E'(filt)"], 
+        df_master.plot(x='f', y=['{}_loss_filt'.format(m)], label=["{}'(filt)".format(m)], 
             ax=ax, logx=True, color=['C1'])
         ax.set_xlabel('Frequency (Hz)')
         ax.set_ylabel('Storage and loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
@@ -249,13 +259,11 @@ def plot_smooth(df_master):
         fig.show()
         return fig
 
-
     elif df_master.domain == 'time':
-        
         fig, ax1 = plt.subplots()
-        df_master.plot(x='t', y=['E_relax'], label = ['E_relax'], 
+        df_master.plot(x='t', y=['{}_relax'.format(m)], label = ['{}_relax'.format(m)], 
             ax=ax1, logx=True, ls='', marker='o', color=['gray'])
-        df_master.plot(x='t', y=['E_relax_filt'], label=['filter'], 
+        df_master.plot(x='t', y=['{}_relax_filt'.format(m)], label=['filter'], 
             ax=ax1, logx=True, color=['r'])
         ax1.set_xlabel('Time (s)')                  #TODO: Make sure it makes sense to include units here...
         ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...

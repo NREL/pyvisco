@@ -5,7 +5,7 @@ from . import prony
 
 #Find optimal number of Prony terms for FEM
 #-----------------------------------------------------------------------------
-def nprony(df_master, prony_series, window='min', err_opt = 0.025):
+def nprony(df_master, prony_series, window='min', opt = 1.5):
     dict_prony = {}
     nprony = prony_series['df_terms'].shape[0]
     
@@ -24,8 +24,9 @@ def nprony(df_master, prony_series, window='min', err_opt = 0.025):
     for key, item in dict_prony.items():
         err.at[key, 'res'] = item['err']
         
-        N_opt = (err['res']-err_opt).abs().sort_values().index[0]
-            
+    err_opt = opt*err['res'].min()
+    N_opt = (err['res']-err_opt).abs().sort_values().index[0]
+          
     return dict_prony, N_opt, err
 
 
@@ -38,14 +39,13 @@ def plot_fit(df_master, dict_prony, N):
 
 
 def plot_residual(N_opt_err):
-
     fig, ax = plt.subplots()
     N_opt_err.plot(y=['res'], ax=ax, c='k', label=['Least squares residual'], 
         marker='o', ls='--', markersize=4, lw=1)
     ax.set_xlabel('Number of Prony terms')
     ax.set_ylabel(r'$R^2 = \sum \left[E_{meas} - E_{Prony} \right]^2$') 
     ax.set_xlim(0,)
-    ax.set_ylim(-0.01,0.25)
+    ax.set_ylim(-0.01, max(2*N_opt_err['res'].min(), 0.25))
     ax.legend()
 
     fig.show()

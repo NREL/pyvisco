@@ -91,7 +91,6 @@ def prep_prony_ANSYS(df_prony_ANSYS, prony, E_0 = None):
 def plot_fit_ANSYS(df_master, df_GMaxw, df_GMaxw_ANSYS):
 
     if df_master.domain == 'freq':
-
         fig, ax1 = plt.subplots()
         df_master.plot(x='f', y=['E_stor', 'E_loss'], label=["E'(exp.)", "E''(exp.)"], 
             ax=ax1, logx=True, color=['C0', 'C1'], alpha=0.5, ls='', marker='o', markersize=3)
@@ -108,7 +107,6 @@ def plot_fit_ANSYS(df_master, df_GMaxw, df_GMaxw_ANSYS):
         return fig
 
     elif df_master.domain == 'time':
-
         fig, ax1 = plt.subplots()
         df_master.plot(x='t', y=['E_relax'], label=['E(exp.)'], 
             ax=ax1, logx=True, color=['C0'], alpha=0.5, ls='', marker='o', markersize=3)

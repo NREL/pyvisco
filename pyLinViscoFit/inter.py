@@ -57,6 +57,7 @@ class Widgets():
         #self.show()
         styles.format_fig()
         styles.format_HTML(self.out_html)
+        self.modul = 'E'
 
     def notebook_width(self):
         """Use full screen width for notebook."""
@@ -106,6 +107,14 @@ class Widgets():
             disabled=False,
             layout = widgets.Layout(height = _height, width = _width))
         self.rb_domain.observe(self.set_instr, 'value')
+
+        self.rb_load = widgets.RadioButtons(
+            options=['tensile', 'shear'],
+            value='tensile', 
+            description='Loading:',
+            disabled=False,
+            layout = widgets.Layout(height = _height, width = _width))
+        self.rb_load.observe(self.set_load, 'value')
 
         self.rb_dis = widgets.RadioButtons(
             options=['default', 'manual'],
@@ -326,6 +335,7 @@ class Widgets():
 
         self.w_inp_gen = widgets.HBox([
             self.rb_domain,
+            self.rb_load,
             self.rb_eplexor,
             self.rb_type,
             self.up_inp,],
@@ -452,10 +462,17 @@ class Control(Widgets):
             self.rb_eplexor.value = 'user'
             self.rb_eplexor.disabled = True
 
+    def set_load(self, change):
+        if change['new'] == 'tensile':
+            self.modul = 'E'
+        elif change['new'] == 'shear':
+            self.modul = 'G'
+
     def set_dis(self, change):
         if change['new'] == 'default':
             self.rb_dis_win.disabled = True
             self.it_nprony.disabled = True
+            self.rb_dis_win.value = 'round'
             self.it_nprony.value = 0
         elif change['new'] == 'manual':
             self.rb_dis_win.disabled = False
@@ -494,13 +511,13 @@ class Control(Widgets):
             #Load modulus
             if self.rb_eplexor.value == 'Eplexor':
                 if self.rb_type.value == 'master':
-                    self.df_master, self.df_aT, self.df_WLF  = load.Eplexor_master(self.up_inp.data[0])
+                    self.df_master, self.df_aT, self.df_WLF  = load.Eplexor_master(self.up_inp.data[0], self.modul)
                     self.ft_RefT.value = self.df_master.RefT
                     self.ft_RefT.disabled = True
 
                    
                 elif self.rb_type.value == 'raw':
-                    self.df_raw, self.arr_RefT = load.Eplexor_raw(self.up_inp.data[0])
+                    self.df_raw, self.arr_RefT = load.Eplexor_raw(self.up_inp.data[0], self.modul)
                     _change = {}
                     _change['new'] = self.ft_RefT.value
                     self.set_RefT(_change)
@@ -508,10 +525,10 @@ class Control(Widgets):
                 
             elif self.rb_eplexor.value == 'user':
                 if self.rb_type.value == 'master':
-                    self.df_master = load.user_master(self.up_inp.data[0], self.rb_domain.value, self.RefT)
+                    self.df_master = load.user_master(self.up_inp.data[0], self.rb_domain.value, self.RefT, self.modul)
 
                 elif self.rb_type.value == 'raw':
-                    self.df_raw, self.arr_RefT = load.user_raw(self.up_inp.data[0], self.rb_domain.value)
+                    self.df_raw, self.arr_RefT = load.user_raw(self.up_inp.data[0], self.rb_domain.value, self.modul)
                     _change = {}
                     _change['new'] = self.ft_RefT.value
                     self.set_RefT(_change)
