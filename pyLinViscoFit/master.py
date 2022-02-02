@@ -33,161 +33,127 @@ Shift factors
 """
 
 #Power law function shift
-def log_func_pwr(x, a, b):
-    return a*x**b
+def pwr_y(x, a, b, e):
+    return a*x**b+e
 
+def pwr_x(y, a, b, e):
+    return ((y-e)/a)**(1/b)
 
-
-# #Linear function shift
-# def log_func(x, k, d):
-#     return k*np.log(x)+d
-
-
-# def get_at(df, gb_ref, gb_shift, remove=False):
-
-#     if remove:
-#         low = 1
-#         upp = -1
-#     else:
-#         low=0
-#         upp=None
-
-#     gb = df.groupby('Set')
-
-#     refx = gb.get_group(gb_ref)["f_set"]
-#     refy = gb.get_group(gb_ref)["E_stor"]
-
-#     refpopt, ref_pcov = curve_fit(log_func, refx[low:upp], refy[low:upp])
-
-#     shiftx = gb.get_group(gb_shift)["f_set"]
-#     shifty = gb.get_group(gb_shift)["E_stor"]
-
-#     shiftpopt, shift_pcov = curve_fit(log_func, shiftx[low:upp], shifty[low:upp])
-
-#     k1 = refpopt[0]
-#     d1 = refpopt[1]
-#     k2 = shiftpopt[0]
-#     d2 = shiftpopt[1]
-
-#     xrefint = log_func(gb.get_group(gb_ref)["f_set"], *refpopt).min()
-#     xshiftint = log_func(gb.get_group(gb_shift)["f_set"], *shiftpopt).max()
-
-#     yint = (xrefint+xshiftint)/2
-#     refxi = np.exp((yint-d1)/k1)
-#     shiftxi = np.exp((yint-d2)/k2)
-#     log_aT = np.log10(refxi/shiftxi)
-
-#     return log_aT, refpopt, shiftpopt
-
-
-# def get_shift_lin(df, RefT, remove=False):
-
-#     gb = df.groupby('Set')
-
-#     arrshift_fit = np.zeros((gb.ngroups,2))
-#     popt = np.zeros((gb.ngroups,2))
-
-#     for group, df_set in gb:
-#         if RefT <= df_set["T_round"].iloc[0]+1 and RefT >= df_set["T_round"].iloc[0]-1:
-#             gb_ref = group
-#             arrshift_fit[int(group),0] = df_set["T_round"].iloc[0]
-
-#     for i in range(int(gb_ref), 0, -1):
-#         arrshift_fit[i-1,0] = gb.get_group(i-1)["T_round"].iloc[0]
-#         arrshift_fit[i-1,1] = get_at(df, i, i-1, remove)[0] + arrshift_fit[i,1]
-
-#     for i in range(int(gb_ref), gb.ngroups-1, 1):
-#         arrshift_fit[i+1,0] = gb.get_group(i+1)["T_round"].iloc[0]
-#         arrshift_fit[i+1,1] = get_at(df, i, i+1, remove)[0] + arrshift_fit[i,1]
-
-#     df_aT = pd.DataFrame(arrshift_fit, columns=['Temp', 'aT']).sort_values(by=['Temp'], ascending=False).reset_index(drop=True)
-
-#     return df_aT
-
-
-def get_at_pwr(df, gb_ref, gb_shift, remove=False):
-
-    if remove:
-        low = 1
-        upp = -1
-    else:
-        low=0
-        upp=None
-
-    if df.domain == 'freq':
-        _domain = 'f_set'
+def fit_at_pwr(df_raw, gb_ref, gb_shift):
+    if df_raw.domain == 'freq':
         _modul = 'E_stor'
-    elif df.domain == 'time':
-        _domain = 'f_set'
+    elif df_raw.domain == 'time':
         _modul = 'E_relax'
 
-    gb = df.groupby('Set')
+    gb = df_raw.groupby('Set')
 
-    refx = gb.get_group(gb_ref)[_domain]
-    refy = gb.get_group(gb_ref)[_modul]
+    ref_xdata   = gb.get_group(gb_ref)['f_set']
+    ref_ydata   = gb.get_group(gb_ref)[_modul]
+    shift_xdata = gb.get_group(gb_shift)['f_set']
+    shift_ydata = gb.get_group(gb_shift)[_modul]
 
-    refpopt, ref_pcov = curve_fit(log_func_pwr, refx[low:upp], refy[low:upp])
+    #Curve fit power law
+    ref_popt, ref_pcov = curve_fit(pwr_y, ref_xdata, ref_ydata, maxfev=10000)
+    shift_popt, shift_pcov = curve_fit(pwr_y, shift_xdata, shift_ydata, maxfev=10000)
 
-    shiftx = gb.get_group(gb_shift)[_domain]
-    shifty = gb.get_group(gb_shift)[_modul]
+    #Check and remove first measurement point if outlier
+    ref_popt_rem, ref_pcov_rem = curve_fit(pwr_y, ref_xdata[1:], ref_ydata[1:], maxfev=10000)
+    perr = np.sqrt(np.abs(np.diag(ref_pcov)))
+    perr_rem = np.sqrt(np.abs(np.diag(ref_pcov_rem)))
+    if all(perr_rem < perr):
+        ref_popt = ref_popt_rem
+        ref_xdata = ref_xdata[1:] 
+        ref_ydata = ref_ydata[1:]
 
-    shiftpopt, shift_pcov = curve_fit(log_func_pwr, shiftx[low:upp], shifty[low:upp])
+    shift_popt_rem, shift_pcov_rem = curve_fit(pwr_y, shift_xdata[1:], shift_ydata[1:], maxfev=10000)
+    perr = np.sqrt(np.abs(np.diag(shift_pcov)))
+    perr_rem = np.sqrt(np.abs(np.diag(shift_pcov_rem)))
+    if all(perr_rem < perr):
+        shift_popt = shift_popt_rem
+        shift_xdata = shift_xdata[1:] 
+        shift_ydata = shift_ydata[1:]
 
-    a1 = refpopt[0]
-    b1 = refpopt[1]
-    a2 = shiftpopt[0]
-    b2 = shiftpopt[1]
+    #Calculate fit
+    ref_ydata_fit = pwr_y(ref_xdata, *ref_popt)
+    shift_ydata_fit = pwr_y(shift_xdata, *shift_popt)
 
-    xrefint = log_func_pwr(gb.get_group(gb_ref)[_domain], *refpopt).min()
-    xshiftint = log_func_pwr(gb.get_group(gb_shift)[_domain], *shiftpopt).max()
+    #Get interpolation or extrapolation range
+    if ref_ydata_fit.max() > shift_ydata_fit.max():
+        #Ref is on top
+        top_xdata = ref_xdata
+        top_ydata = ref_ydata
+        top_popt = ref_popt
+        bot_xdata = shift_xdata
+        bot_ydata = shift_ydata
+        bot_popt = shift_popt
+        sign = 1
+    else:
+        #Shift is on top
+        top_xdata = shift_xdata
+        top_ydata = shift_ydata   
+        top_popt = shift_popt
+        bot_xdata = ref_xdata
+        bot_ydata = ref_ydata
+        bot_popt = ref_popt
+        sign = -1
+        
+    if top_ydata.min() < bot_ydata.max():
+        #overlap range
+        ymin = top_ydata.min()
+        ymax = bot_ydata.max()
+    else:
+        #gap range
+        ymin = bot_ydata.max()
+        ymax = top_ydata.min()   
+        
+    #Define three points along inter/extrapolation range
+    ymid = (ymin+ymax)/2
+    y = np.array([ymin, ymid, ymax])
 
-    yint = (xrefint+xshiftint)/2
-    refxi = (yint/a1)**(1/b1)
-    shiftxi = (yint/a2)**(1/b2)
-    log_aT = np.log10(refxi/shiftxi)
+    #Compute average shift factor for the three points
+    x_top = pwr_x(y, *top_popt)
+    x_bot = pwr_x(y, *bot_popt)
 
-    return log_aT, refpopt, shiftpopt
+    log_aT = sign * np.log10(x_top/x_bot).mean()
+
+    return log_aT
 
 
-def get_aT(df, RefT, remove=False):
+def get_aT(df_raw, RefT):
+    #Create df_aT
+    Temp = []
+    for i, df_set in df_raw.groupby('Set'):
+        T = df_set['T_round'].iloc[0]
+        Temp.append(T)
+        if T == RefT:
+            idx = i
+    df_aT = pd.DataFrame(Temp, columns=['Temp'])
+    df_aT['log_aT'] = np.nan 
 
-    gb = df.groupby('Set')
+    #Set shift factor at RefT
+    df_aT.loc[idx]['log_aT'] = 0
 
-    arrshift_fit = np.zeros((gb.ngroups,2))
-    popt = np.zeros((gb.ngroups,2))
-
-    for group, df_set in gb:
-        if RefT <= df_set["T_round"].iloc[0]+1 and RefT >= df_set["T_round"].iloc[0]-1:
-            gb_ref = group
-            arrshift_fit[int(group),0] = df_set["T_round"].iloc[0]
-
-    for i in range(int(gb_ref), 0, -1):
-        arrshift_fit[i-1,0] = gb.get_group(i-1)["T_round"].iloc[0]
-        arrshift_fit[i-1,1] = get_at_pwr(df, i, i-1, remove)[0] + arrshift_fit[i,1]
-
-    for i in range(int(gb_ref), gb.ngroups-1, 1):
-        arrshift_fit[i+1,0] = gb.get_group(i+1)["T_round"].iloc[0]
-        arrshift_fit[i+1,1] = get_at_pwr(df, i, i+1, remove)[0] + arrshift_fit[i,1]
-
-    df_aT = pd.DataFrame(arrshift_fit, columns=['Temp', 'aT']).sort_values(by=['Temp'], ascending=False).reset_index(drop=True)
+    #Shift below RefT
+    for i in range(idx, 0, -1):
+        df_aT.loc[i-1]['log_aT'] = fit_at_pwr(df_raw, i, i-1) + df_aT.loc[i]['log_aT']
+        
+    #Shift above RefT
+    for i in range(idx, df_aT.shape[0]-1, 1):
+        df_aT.loc[i+1]['log_aT'] = fit_at_pwr(df_raw, i, i+1) + df_aT.loc[i]['log_aT']
 
     return df_aT
 
 
 def get_curve(df_raw, df_aT, RefT):
-
-    gb = df_raw.groupby('Set')
-    _num = int(df_raw.shape[0]/gb.ngroups)
-
-    _shift = np.array([])
-
-    for index, rows in df_aT.iterrows():
-        _shift = np.append(_shift, np.flip(df_raw['f_set'][index*_num:(index+1)*_num].values*10**(rows['aT'])))
-
-    df_raw['f'] = np.flip(_shift)
+    df_shift = pd.DataFrame() 
+    for S, df in df_raw.groupby('Set'):  
+        aT = 10**(df_aT[df_aT['Temp'] == df['T_round'].iloc[0]]['log_aT'].values)
+        fshift = aT * df['f_set']
+        df_shift = df_shift.append(fshift.to_frame())
 
     if df_raw.domain == 'freq':
-        df_master = df_raw[["f", "E_stor", "E_loss", "Set"]].copy()
+        df_master = df_raw[["E_stor", "E_loss", "Set"]].copy()
+        df_master['f'] = df_shift
         if "E_comp" in df_raw:
             df_master['E_comp'] = df_raw['E_comp']
             df_master['tan_del'] = df_raw['tan_del']
@@ -197,20 +163,14 @@ def get_curve(df_raw, df_aT, RefT):
         df_master['omega'] = 2*np.pi*df_master['f']
         df_master['t'] = 1/df_master['f'] 
 
-        
     elif df_raw.domain == 'time':
-        df_raw['t'] = 1/df_raw['f']
-
-        df_master = df_raw[["t", "E_relax", "Set"]].copy()
+        df_master = df_raw[["E_relax", "Set"]].copy()
+        df_master['t'] = 1/df_shift
         df_master = df_master.sort_values(by=['t']).reset_index(drop=True)
         df_master.RefT = RefT
         df_master.domain = df_raw.domain
         df_master['f'] = 1/df_master['t']
         df_master['omega'] = 2*np.pi*df_master['f'] 
-
-        df_raw = df_raw.drop(['t'], axis=1)
-
-    df_raw = df_raw.drop(['f'], axis=1)
 
     return df_master
 

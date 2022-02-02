@@ -433,7 +433,6 @@ def GMaxw_temp(shift_func, df_GMaxw, df_coeff, df_aT, freq = [1E-8, 1E-4, 1E0, 1
 
 
 def plot_GMaxw(df_GMaxw):
-
     fig1, ax1 = plt.subplots() #figsize=(8,0.75*4)
     df_GMaxw.plot(x='f', y=['E_stor'], ax=ax1, logx=True, ls='-', lw=2, color=['C0'])
     df_GMaxw.plot(x='f', y=['E_loss'], ax=ax1, logx=True, ls=':', lw=2, color=['C1'])

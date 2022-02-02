@@ -555,6 +555,7 @@ class Control(Widgets):
     def inter_aT(self,b):
         with self.out_aT:
             clear_output()
+            display(self.w_loading)
             if not isinstance(self.df_aT, pd.DataFrame) or self.cb_aT.value:
                 self.df_aT = master.get_aT(self.df_raw, self.RefT)
 
@@ -563,7 +564,7 @@ class Control(Widgets):
             self.files['df_master'] = self.df_master.to_csv(index = False)
             self.files['df_aT'] = self.df_aT.to_csv(index = False)
             self.b_shift.disabled = False
-
+            clear_output()
             try:
                 self.fig_master_shift = master.plot_shift(self.df_raw, self.df_master)
                 self.files['fig_master_shift'] = fig_bytes(self.fig_master_shift)

@@ -33,7 +33,7 @@ def poly4(x,C0,C1,C2,C3,C4):
 def fit_WLF(RefT, df_aT):
 
     xdata = df_aT['Temp'].values+273.15
-    ydata = df_aT['aT'].values
+    ydata = df_aT['log_aT'].values
 
     popt, _pcov = curve_fit(lambda x, C1, C2: WLF(x, RefT+273.15, C1, C2), 
         xdata, ydata, p0 = [1E3, 5E3], bounds=(0, 5000))
@@ -53,7 +53,7 @@ def fit_poly(df_aT):
 
     #Kelvin
     xdata = df_aT['Temp'].values+273.15
-    ydata = df_aT['aT'].values
+    ydata = df_aT['log_aT'].values
 
     df['P4 (K)'][['C0', 'C1', 'C2', 'C3', 'C4']], _pcov = curve_fit(poly4, xdata, ydata)
     df['P3 (K)'][['C0', 'C1', 'C2', 'C3']], _pcov = curve_fit(poly3, xdata, ydata)
@@ -74,7 +74,7 @@ def fit_poly(df_aT):
 def plot(df_aT, df_WLF, df_poly):
 
     x = df_aT['Temp'].values
-    y_aT = df_aT['aT'].values
+    y_aT = df_aT['log_aT'].values
 
     y_WLF = WLF(df_aT['Temp'], df_WLF['RefT'].values, df_WLF['C1'].values, df_WLF['C2'].values)
 

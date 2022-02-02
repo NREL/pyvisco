@@ -100,7 +100,7 @@ def Eplexor_master(data):
     C2 = float(df.columns.values[2][1][5:-2])
     WLF = [RefT, C1, C2]
 
-    df.columns = ['Temp', 'aT', 'DEL']
+    df.columns = ['Temp', 'log_aT', 'DEL']
     df.drop(['DEL'], axis = 1, inplace = True)
     df_aT = df.round({'Temp': 0})
 
@@ -150,7 +150,7 @@ def user_master(data, domain, RefT):
 def user_shift(data_shift):
     """Load user provided shift factors."""
     df_aT = pd.read_csv(io.BytesIO(data_shift))
-    df_aT.rename(columns = {'Temp':'Temp', 'aT':'aT'}, inplace=True, 
+    df_aT.rename(columns = {'Temp':'Temp', 'log_aT':'log_aT'}, inplace=True, 
         errors='raise')
 
     return df_aT
