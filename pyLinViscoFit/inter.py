@@ -160,7 +160,7 @@ class Widgets():
 
         self.cb_aT = widgets.Checkbox(
             value=False, 
-            description='fit and overwrite provided shift factors?',
+            description='fit and overwrite provided shift factors',
             disabled=True,
             indent = True,
             layout = widgets.Layout(height = _height, width = _width),
