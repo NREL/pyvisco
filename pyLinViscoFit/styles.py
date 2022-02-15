@@ -51,6 +51,7 @@ def format_fig():
     #plt.rcParams['figure.constrained_layout.w_pad'] = 0.05
     #plt.rcParams['figure.constrained_layout.h_pad'] = 0.05
 
+
     #ipympl duplicate plot issue
     #https://issueexplorer.com/issue/matplotlib/ipympl/402
     plt.ioff()
@@ -75,14 +76,17 @@ def format_HTML(widget):
             height: 1px;
             margin: 1em 0;
         }
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
         </style>
         """
         ))
+
+
+
+# input::-webkit-outer-spin-button,
+# input::-webkit-inner-spin-button {
+#     -webkit-appearance: none;
+#     margin: 0;
+# }
+# input[type=number] {
+#     -moz-appearance: textfield;
+# }

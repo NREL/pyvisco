@@ -32,7 +32,7 @@ def poly4(x,C0,C1,C2,C3,C4):
 
 def fit_WLF(RefT, df_aT):
 
-    xdata = df_aT['Temp'].values+273.15
+    xdata = df_aT['T'].values+273.15
     ydata = df_aT['log_aT'].values
 
     popt, _pcov = curve_fit(lambda x, C1, C2: WLF(x, RefT+273.15, C1, C2), 
@@ -46,42 +46,64 @@ def fit_WLF(RefT, df_aT):
 
 def fit_poly(df_aT):
 
-    df = pd.DataFrame(np.zeros((5, 8)), 
+    df_K = pd.DataFrame(np.zeros((5, 4)), 
         index = ['C0', 'C1', 'C2', 'C3', 'C4'], 
-        columns=['P4 (K)', 'P3 (K)', 'P2 (K)', 'P1 (K)', 'P4 (C)', 'P3 (C)','P2 (C)','P1 (C)'],
+        columns=['D4', 'D3', 'D2', 'D1'],
         dtype=float)
 
     #Kelvin
-    xdata = df_aT['Temp'].values+273.15
+    xdata = df_aT['T'].values+273.15
     ydata = df_aT['log_aT'].values
 
-    df['P4 (K)'][['C0', 'C1', 'C2', 'C3', 'C4']], _pcov = curve_fit(poly4, xdata, ydata)
-    df['P3 (K)'][['C0', 'C1', 'C2', 'C3']], _pcov = curve_fit(poly3, xdata, ydata)
-    df['P2 (K)'][['C0', 'C1', 'C2']], _pcov = curve_fit(poly2, xdata, ydata)
-    df['P1 (K)'][['C0', 'C1']], _pcov = curve_fit(poly1, xdata, ydata)
+    df_K['D4'][['C0', 'C1', 'C2', 'C3', 'C4']], _pcov = curve_fit(poly4, xdata, ydata)
+    df_K['D3'][['C0', 'C1', 'C2', 'C3']], _pcov = curve_fit(poly3, xdata, ydata)
+    df_K['D2'][['C0', 'C1', 'C2']], _pcov = curve_fit(poly2, xdata, ydata)
+    df_K['D1'][['C0', 'C1']], _pcov = curve_fit(poly1, xdata, ydata)
 #
     ##Celsius
-    xdata = df_aT['Temp'].values
-#
-    df['P4 (C)'][['C0', 'C1', 'C2', 'C3', 'C4']], _pcov = curve_fit(poly4, xdata, ydata)
-    df['P3 (C)'][['C0', 'C1', 'C2', 'C3']], _pcov = curve_fit(poly3, xdata, ydata)
-    df['P2 (C)'][['C0', 'C1', 'C2']], _pcov = curve_fit(poly2, xdata, ydata)
-    df['P1 (C)'][['C0', 'C1']], _pcov = curve_fit(poly1, xdata, ydata)
 
-    return df
+    df_C = pd.DataFrame(np.zeros((5, 4)), 
+    index = ['C0', 'C1', 'C2', 'C3', 'C4'], 
+    columns=['D4', 'D3', 'D2', 'D1'],
+    dtype=float)
+
+    xdata = df_aT['T'].values
+    ydata = df_aT['log_aT'].values
+#
+    df_C['D4'][['C0', 'C1', 'C2', 'C3', 'C4']], _pcov = curve_fit(poly4, xdata, ydata)
+    df_C['D3'][['C0', 'C1', 'C2', 'C3']], _pcov = curve_fit(poly3, xdata, ydata)
+    df_C['D2'][['C0', 'C1', 'C2']], _pcov = curve_fit(poly2, xdata, ydata)
+    df_C['D1'][['C0', 'C1']], _pcov = curve_fit(poly1, xdata, ydata)
+
+    df_C = df_C.T
+    df_K = df_K.T
+
+    coeff_C = df_C.columns.get_level_values(0)
+    C = ['°C', '-', '°C^-1', '°C^-2', '°C^-3']
+    df_C.columns = pd.MultiIndex.from_tuples(zip(coeff_C, C), names = ['Degree', '-'])
+
+    coeff_K = df_K.columns.get_level_values(0)
+    K = ['K', '-', 'K^-1', 'K^-2', 'K^-3']
+    df_K.columns = pd.MultiIndex.from_tuples(zip(coeff_K, K), names = ['Degree', '-'])
+
+    return df_C, df_K
 
 
 def plot(df_aT, df_WLF, df_poly):
 
-    x = df_aT['Temp'].values
+    x = df_aT['T'].values
     y_aT = df_aT['log_aT'].values
 
-    y_WLF = WLF(df_aT['Temp'], df_WLF['RefT'].values, df_WLF['C1'].values, df_WLF['C2'].values)
+    y_WLF = WLF(df_aT['T'], df_WLF['RefT'].values, df_WLF['C1'].values, df_WLF['C2'].values)
 
-    y_poly4 = poly4(df_aT['Temp'], *df_poly['P4 (C)'])
-    y_poly3 = poly3(df_aT['Temp'], *df_poly['P3 (C)'][0:4])
-    y_poly2 = poly2(df_aT['Temp'], *df_poly['P2 (C)'][0:3])
-    y_poly1 = poly1(df_aT['Temp'], *df_poly['P1 (C)'][0:2])
+    df_p = df_poly.copy()
+    df_p.columns = df_poly.columns.droplevel(1)
+    df_p = df_p.T
+
+    y_poly4 = poly4(df_aT['T'], *df_p['D4'])
+    y_poly3 = poly3(df_aT['T'], *df_p['D3'][0:4])
+    y_poly2 = poly2(df_aT['T'], *df_p['D2'][0:3])
+    y_poly1 = poly1(df_aT['T'], *df_p['D1'][0:2])
 
     fig, ax = plt.subplots()
     ax.plot(x, y_aT, ls='', marker='o', c='r', label='Shift factors',zorder=10)

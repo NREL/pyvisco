@@ -6,24 +6,25 @@ from scipy.optimize import curve_fit
 
 
 
-def plot(df_master):
+def plot(df_master, units):
     """Simple function to plot the master curve."""
+    m = df_master.modul
     if df_master.domain == 'freq':
-
+        
         fig, ax1 = plt.subplots()
         df_master.plot(x='f', 
-            y=['{}_stor'.format(df_master.modul), '{}_loss'.format(df_master.modul)], ax=ax1, logx=True)
-        ax1.set_xlabel('Frequency (Hz)')
-        ax1.set_ylabel('Storage and loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+            y=['{}_stor'.format(m), '{}_loss'.format(m)], ax=ax1, logx=True)
+        ax1.set_xlabel('Frequency ({})'.format(units['f']))
+        ax1.set_ylabel('Storage and loss modulus ({})'.format(units['{}_stor'.format(m)])) 
 
         fig.show()
         return fig
 
     elif df_master.domain == 'time':
         fig, ax1 = plt.subplots()
-        df_master.plot(x='f', y=['{}_relax'.format(df_master.modul)], ax=ax1, logx=True)
-        ax1.set_xlabel('Time (s)')
-        ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        df_master.plot(x='f', y=['{}_relax'.format(m)], ax=ax1, logx=True)
+        ax1.set_xlabel('Time ({})'.format(units['t']))
+        ax1.set_ylabel('Relaxation modulus ({})'.format(units['{}_relax'.format(m)]))
 
         fig.show()
         return fig
@@ -129,7 +130,7 @@ def get_aT(df_raw, RefT):
         Temp.append(T)
         if T == RefT:
             idx = i
-    df_aT = pd.DataFrame(Temp, columns=['Temp'])
+    df_aT = pd.DataFrame(Temp, columns=['T'])
     df_aT['log_aT'] = np.nan 
 
     #Set shift factor at RefT
@@ -150,7 +151,7 @@ def get_curve(df_raw, df_aT, RefT):
     m = df_raw.modul
     df_shift = pd.DataFrame() 
     for S, df in df_raw.groupby('Set'):  
-        aT = 10**(df_aT[df_aT['Temp'] == df['T_round'].iloc[0]]['log_aT'].values)
+        aT = 10**(df_aT[df_aT['T'] == df['T_round'].iloc[0]]['log_aT'].values)
         fshift = aT * df['f_set']
         df_shift = df_shift.append(fshift.to_frame())
 
@@ -183,48 +184,116 @@ def get_curve(df_raw, df_aT, RefT):
     return df_master
 
 
-def plot_shift(df_raw, df_master):
+def plot_shift(df_raw, df_master, units):
     m = df_raw.modul
     if df_master.domain == 'freq':
 
         fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
         ax1.set_xlabel('Frequency (Hz)')
-        ax1.set_ylabel('Storage modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.set_ylabel('Storage modulus ({})'.format(units["{}_stor".format(m)]))
         ax2.set_xlabel('Frequency (Hz)')
-        ax2.set_ylabel('Loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax2.set_ylabel('Loss modulus ({})'.format(units["{}_stor".format(m)])) 
 
         gb_raw = df_raw.groupby('Set')
         gb_master = df_master.groupby('Set')
         colors1 = np.flip(plt.cm.Blues(np.linspace(0,1,int(gb_raw.ngroups*1.25))),axis=0)
         colors2 = np.flip(plt.cm.Oranges(np.linspace(0,1,int(gb_raw.ngroups*1.25))),axis=0)
 
-        for group, df_set in gb_master:
-            ax1.semilogx(df_set["f"], df_set["{}_stor".format(m)], ls='', marker='.', color=colors1[int(group)])
-            ax2.semilogx(df_set["f"], df_set["{}_loss".format(m)], ls='', marker='.', color=colors2[int(group)])
-        for group, df_set in gb_raw:
-            ax1.semilogx(df_set["f_set"], df_set["{}_stor".format(m)], ls='', marker='.', color=colors1[int(group)])
-            ax2.semilogx(df_set["f_set"], df_set["{}_loss".format(m)], ls='', marker='.', color=colors2[int(group)])
+        lax1 = []
+        lax2 = []
+        for i, (group, df_set) in enumerate(gb_master):
+            line1, = ax1.semilogx(df_set["f"], df_set["{}_stor".format(m)], ls='', marker='.', 
+                color=colors1[int(group)])
+            line2, = ax2.semilogx(df_set["f"], df_set["{}_loss".format(m)], ls='', marker='.', 
+                color=colors2[int(group)])
+            lax1.append(line1)
+            lax2.append(line2)
+        for i, (group, df_set) in enumerate(gb_raw):
+            if i in np.linspace(0, gb_raw.ngroups-1, num=5, dtype=int):
+                ax1.semilogx(df_set["f_set"], df_set["{}_stor".format(m)], ls='', marker='.', 
+                color=colors1[int(group)], label = '$T$={}\N{DEGREE SIGN}C'.format(df_set['T_round'].iloc[0]))
+                ax2.semilogx(df_set["f_set"], df_set["{}_loss".format(m)], ls='', marker='.', 
+                color=colors2[int(group)], label = '$T$={}\N{DEGREE SIGN}C'.format(df_set['T_round'].iloc[0]))
+            else:
+                ax1.semilogx(df_set["f_set"], df_set["{}_stor".format(m)], ls='', marker='.', 
+                color=colors1[int(group)])
+                ax2.semilogx(df_set["f_set"], df_set["{}_loss".format(m)], ls='', marker='.', 
+                color=colors2[int(group)])
+
+        legend1 = ax1.legend(handlelength=1, handletextpad=0.1, fontsize=8)
+        legend2 = ax2.legend(handlelength=1, handletextpad=0.1, fontsize=8)
+        for legend_handle in legend1.legendHandles:
+            legend_handle._legmarker.set_markersize(8)
+        for legend_handle in legend2.legendHandles:
+            legend_handle._legmarker.set_markersize(8)
+
 
         fig.show()
-        return fig
+        return fig, (ax1, lax1, ax2, lax2)
 
     elif df_master.domain == 'time':
         fig, ax1 = plt.subplots()
         ax1.set_xlabel('Time (s)')
-        ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.set_ylabel('Relaxation modulus ({})'.format(units["{}_relax".format(m)])) 
         
         gb_raw = df_raw.groupby('Set')
         gb_master = df_master.groupby('Set')
         colors1 = np.flip(plt.cm.Blues(np.linspace(0,1,int(gb_raw.ngroups*1.25))),axis=0)
 
-        for group, df_set in gb_master:
-            ax1.semilogx(df_set["t"], df_set["{}_relax".format(m)], ls='', marker='.', color=colors1[int(group)])
-        for group, df_set in gb_raw:
-            ax1.semilogx(df_set["t_set"], df_set["{}_relax".format(m)], ls='', marker='.', color=colors1[int(group)])
+        lax1 = []
+        for i, (group, df_set) in enumerate(gb_master):
+            line1, = ax1.semilogx(df_set["t"], df_set["{}_relax".format(m)], ls='', marker='.', 
+                color=colors1[int(group)])
+            lax1.append(line1)
+        for i, (group, df_set) in enumerate(gb_raw):
+            if i in np.linspace(0, gb_raw.ngroups-1, num=5, dtype=int):
+                ax1.semilogx(df_set["t_set"], df_set["{}_relax".format(m)], ls='', marker='.', 
+                color=colors1[int(group)], label = '$T$={}\N{DEGREE SIGN}C'.format(df_set['T_round'].iloc[0]))
+            else:
+                ax1.semilogx(df_set["t_set"], df_set["{}_relax".format(m)], ls='', marker='.', 
+                color=colors1[int(group)])
 
+        legend = ax1.legend(handlelength=1, handletextpad=0.1, fontsize=8)
+        for legend_handle in legend.legendHandles:
+            legend_handle._legmarker.set_markersize(8)
 
         fig.show()
-        return fig
+        return fig, (ax1, lax1)
+
+
+def plot_shift_update(df_master, fig, lax):
+    m = df_master.modul
+
+    gb_master = df_master.groupby('Set')
+    if len(lax) == 2:
+        ax1, lax1 = lax
+    elif len(lax) == 4:
+        ax1, lax1, ax2, lax2 = lax
+
+    for i, (group, df_set) in enumerate(gb_master):
+        line1 = lax1[i]
+        line1.set_xdata(df_set["f"])
+        line1.set_ydata(df_set["{}_stor".format(m)])
+
+        if len(lax) == 4:
+            line2 = lax2[i]
+            line2.set_xdata(df_set["f"])
+            line2.set_ydata(df_set["{}_loss".format(m)])
+        
+    ax1.relim()
+    ax1.autoscale_view()
+    if len(lax) == 4:
+        ax2.relim()
+        ax2.autoscale_view()
+
+    fig.canvas.draw_idle()
+
+    #fig.canvas.draw()
+    fig.canvas.flush_events()
+
+    return fig
+
+
 
 def smooth(df_master, win):
     m = df_master.modul
@@ -240,7 +309,7 @@ def smooth(df_master, win):
 
     return df_master
 
-def plot_smooth(df_master):
+def plot_smooth(df_master, units):
     m = df_master.modul
     if df_master.domain == 'freq':
         fig, ax = plt.subplots()
@@ -252,8 +321,8 @@ def plot_smooth(df_master):
             ax=ax, logx=True, color=['C1'], marker='o', ls='', alpha=0.5)
         df_master.plot(x='f', y=['{}_loss_filt'.format(m)], label=["{}'(filt)".format(m)], 
             ax=ax, logx=True, color=['C1'])
-        ax.set_xlabel('Frequency (Hz)')
-        ax.set_ylabel('Storage and loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax.set_xlabel('Frequency ({})'.format(units['f']))
+        ax.set_ylabel('Storage and loss modulus ({})'.format(units['{}_stor'.format(m)])) 
         ax.legend()
 
         fig.show()
@@ -265,8 +334,8 @@ def plot_smooth(df_master):
             ax=ax1, logx=True, ls='', marker='o', color=['gray'])
         df_master.plot(x='t', y=['{}_relax_filt'.format(m)], label=['filter'], 
             ax=ax1, logx=True, color=['r'])
-        ax1.set_xlabel('Time (s)')                  #TODO: Make sure it makes sense to include units here...
-        ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.set_xlabel('Time ({})'.format(units['t']))
+        ax1.set_ylabel('Relaxation modulus ({})'.format(units['{}_relax'.format(m)])) 
         ax1.legend()
 
         fig.show()

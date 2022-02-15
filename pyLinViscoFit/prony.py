@@ -67,7 +67,7 @@ def fit_freq(df_dis, df_master=None, opt=False):
         omega_meas = df_master['omega'].values
 
         #get Prony series
-        tau_i = df_dis['tau']
+        tau_i = df_dis['tau_i']
         x0 = np.hstack((alpha_i, tau_i))
 
         #Define bounds
@@ -82,27 +82,27 @@ def fit_freq(df_dis, df_master=None, opt=False):
             bounds=bnd,  method='L-BFGS-B', options={'maxls':200})
         
         alpha_i = res.x[0:int(res.x.shape[0]/2)]
-        df_dis['tau'] = res.x[int(res.x.shape[0]/2):]
+        df_dis['tau_i'] = res.x[int(res.x.shape[0]/2):]
         err = res.fun
         if res.success:
-            print('Prony series fit N = {:02d}: Succesful!'.format(alpha_i.shape[0]))
+            print('Prony series fit N = {:02d}: Convergence criterion reached!'.format(alpha_i.shape[0]))
         else:
-            print('Prony series fit N = {:02d}: Failed to converge!'.format(alpha_i.shape[0]))
+            print('Prony series fit N = {:02d}: Convergence criterion not reached!'.format(alpha_i.shape[0]))
 
     #Ensure that Sum(alpha_i) < 1 (otherwise can lead to numerical difficulties in FEM)
     if alpha_i.sum() >= 1:
-        df_dis['alpha'] = 0.999/alpha_i.sum()*alpha_i #Normalize alpha values to 0.999
+        df_dis['alpha_i'] = 0.999/alpha_i.sum()*alpha_i #Normalize alpha values to 0.999
     else:
-        df_dis['alpha'] = alpha_i
+        df_dis['alpha_i'] = alpha_i
 
-    df_prony = df_dis[['tau', 'alpha']].copy()
+    df_prony = df_dis[['tau_i', 'alpha_i']].copy()
     df_prony = df_prony.iloc[::-1].reset_index(drop=True)
     df_prony.index += 1 
     df_prony['{}_0'.format(m)] = E_0
-    df_prony['{}_i'.format(m)] = E_0 * df_prony['alpha']
+    df_prony['{}_i'.format(m)] = E_0 * df_prony['alpha_i']
     df_prony.RefT = df_dis.RefT
 
-    prony = {'E_0'.format(m):E_0, 'df_terms':df_prony, 'f_min':df_dis.f_min, 
+    prony = {'E_0':E_0, 'df_terms':df_prony, 'f_min':df_dis.f_min, 
         'f_max':df_dis.f_max, 'label':'equi.', 'err' : err, 'decades':df_dis.decades,
         'modul':m}
     
@@ -136,8 +136,8 @@ def opt_time(x0, E_meas_norm, time_meas):
 
 def fit_time(df_dis, df_master, opt=False):
     m = df_dis.modul
-    alpha_i = np.ones(df_dis['tau'].values.shape) #start all a_i = 1
-    tau_i = df_dis['tau'].values
+    alpha_i = np.ones(df_dis['tau_i'].values.shape) #start all a_i = 1
+    tau_i = df_dis['tau_i'].values
 
     E_meas_norm = df_master['{}_relax_filt'.format(m)].values / df_dis.E_0
 
@@ -162,25 +162,25 @@ def fit_time(df_dis, df_master, opt=False):
             method='L-BFGS-B' , bounds=bnd) 
 
         if res.success:
-            print('Prony series fit N = {:02d}: Succesful!'.format(alpha_i.shape[0]))
+            print('Prony series fit N = {:02d}: Convergence criterion reached!'.format(alpha_i.shape[0]))
         else:
-            print('Prony series fit N = {:02d}: Failed to converge!'.format(alpha_i.shape[0]))
+            print('Prony series fit N = {:02d}: Convergence criterion not reached!'.format(alpha_i.shape[0]))
 
         alpha_i = res.x[0:int(res.x.shape[0]/2)]
-        df_dis['tau'] = res.x[int(res.x.shape[0]/2):]
+        df_dis['tau_i'] = res.x[int(res.x.shape[0]/2):]
      
 
     #Ensure that Sum(alpha_i) < 1 (otherwise can lead to numerical difficulties in FEM)
     if alpha_i.sum() >= 1:
-        df_dis['alpha'] = 0.999/alpha_i.sum()*alpha_i #Normalize alpha values to 0.999
+        df_dis['alpha_i'] = 0.999/alpha_i.sum()*alpha_i #Normalize alpha values to 0.999
     else:
-        df_dis['alpha'] = alpha_i
+        df_dis['alpha_i'] = alpha_i
 
-    df_prony = df_dis[['tau', 'alpha']].copy()
+    df_prony = df_dis[['tau_i', 'alpha_i']].copy()
     df_prony = df_prony.iloc[::-1].reset_index(drop=True)
     df_prony.index += 1 
     df_prony['{}_0'.format(m)] = df_dis.E_0
-    df_prony['{}_i'.format(m)] = df_dis.E_0 * df_prony['alpha']
+    df_prony['{}_i'.format(m)] = df_dis.E_0 * df_prony['alpha_i']
     df_prony.RefT = df_dis.RefT
 
     prony = {'E_0':df_dis.E_0, 'df_terms':df_prony, 'f_min':df_dis.f_min, 
@@ -203,7 +203,7 @@ def fit(df_dis, df_master=None, opt=False):
 
     return prony, df_GMaxw
 
-def plot_fit(df_master, df_GMaxw):
+def plot_fit(df_master, df_GMaxw, units):
     m = df_master.modul
     if df_master.domain == 'freq':
 
@@ -212,8 +212,8 @@ def plot_fit(df_master, df_GMaxw):
             ax=ax1, logx=True, color=['C0', 'C1'], alpha=0.5, ls='', marker='o', markersize=3)
         df_GMaxw.plot(x='f', y=['{}_stor'.format(m), '{}_loss'.format(m)], 
             ax=ax1, logx=True, ls='-', lw=2, color=['C0', 'C1'])
-        ax1.set_xlabel('Frequency (Hz)')
-        ax1.set_ylabel('Storage and loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.set_xlabel('Frequency ({})'.format(units['f']))
+        ax1.set_ylabel('Storage and loss modulus ({})'.format(units['{}_stor'.format(m)])) 
         ax1.legend()
 
         fig.show()
@@ -225,8 +225,8 @@ def plot_fit(df_master, df_GMaxw):
             ax=ax1, logx=True, color=['gray'], ls='', marker='o', markersize=3)
         df_GMaxw.plot(x='t', y=['{}_relax'.format(m)], 
             label=['fit'], ax=ax1, logx=True, ls='-', lw=2, color=['r'])
-        ax1.set_xlabel('Time (s)')
-        ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.set_xlabel('Time ({})'.format(units['t']))
+        ax1.set_ylabel('Relaxation modulus ({})'.format(units['{}_relax'.format(m)])) 
         ax1.legend()
 
         fig.show()
@@ -291,7 +291,7 @@ def discretize(df_master, window='round', nprony=0):
 
         #Assembly data frame
         df_dis = pd.DataFrame([freq_dis, E_stor_dis, E_loss_dis, omega_dis, tau]).T
-        df_dis.columns = ['f', '{}_stor'.format(m), '{}_loss'.format(m), 'omega', 'tau']
+        df_dis.columns = ['f', '{}_stor'.format(m), '{}_loss'.format(m), 'omega', 'tau_i']
 
     elif df_master.domain == 'time':
     
@@ -304,7 +304,7 @@ def discretize(df_master, window='round', nprony=0):
 
         #Assembly data frame
         df_dis = pd.DataFrame([tau, t_dis, E_relax_dis, omega_dis, freq_dis]).T
-        df_dis.columns = ['tau', 't', '{}_relax'.format(m), 'omega', 'f']
+        df_dis.columns = ['tau_i', 't', '{}_relax'.format(m), 'omega', 'f']
 
     #Add df attributes    
     df_dis.index += 1 
@@ -321,7 +321,7 @@ def discretize(df_master, window='round', nprony=0):
     return df_dis
 
 
-def plot_dis(df_master, df_dis):
+def plot_dis(df_master, df_dis, units):
     m = df_master.modul
     if df_master.domain == 'freq':
         fig, ax1 = plt.subplots()
@@ -329,8 +329,8 @@ def plot_dis(df_master, df_dis):
             ax=ax1, logx=True, color=['C0', 'C1'], alpha=0.5)
         df_dis.plot(x='f', y=['{}_stor'.format(m), '{}_loss'.format(m)], 
             label=['tau_i', 'tau_i'], ax=ax1, logx=True, ls='', marker='o', color=['C0', 'C1'])
-        ax1.set_xlabel('Frequency (Hz)')
-        ax1.set_ylabel('Storage and loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.set_xlabel('Frequency ({})'.format(units['f']))
+        ax1.set_ylabel('Storage and loss modulus ({})'.format(units['{}_stor'.format(m)]))
         ax1.legend()
 
         fig.show()
@@ -342,8 +342,8 @@ def plot_dis(df_master, df_dis):
         df_master.plot(x='t', y=['{}_relax'.format(m)], ax=ax1, logx=True, color=['k'])
         df_dis.plot(x='t', y=['{}_relax'.format(m)], label = ['tau_i'], 
             ax=ax1, logx=True, ls='', marker='o', color=['red'])
-        ax1.set_xlabel('Time (s)')
-        ax1.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+        ax1.set_xlabel('Time ({})'.format(units['t']))
+        ax1.set_ylabel('Relaxation modulus ({})'.format(units['{}_relax'.format(m)]))
         ax1.legend()
 
         fig.show()
@@ -352,8 +352,8 @@ def plot_dis(df_master, df_dis):
 
 def calc_GMaxw(E_0, df_terms, f_min, f_max, decades, modul, **kwargs):
     m = modul
-    alpha_i = df_terms['alpha'].values
-    tau_i = df_terms['tau'].values
+    alpha_i = df_terms['alpha_i'].values
+    tau_i = df_terms['tau_i'].values
 
     #Define angular frequency range for plotting
     omega_min = 2*np.pi*f_min
@@ -403,8 +403,8 @@ def GMaxw_temp(shift_func, df_GMaxw, df_coeff, df_aT, freq = [1E-8, 1E-4, 1E0, 1
     m = df_GMaxw.modul
     df_temp = pd.DataFrame()
 
-    T_min = int(df_aT['Temp'].min())
-    T_max = int(df_aT['Temp'].max())
+    T_min = int(df_aT['T'].min())
+    T_max = int(df_aT['T'].max())
 
     for f in freq:
         for T in range(T_min, T_max+1):
@@ -446,26 +446,26 @@ def GMaxw_temp(shift_func, df_GMaxw, df_coeff, df_aT, freq = [1E-8, 1E-4, 1E0, 1
     return df_GMaxw_temp
 
 
-def plot_GMaxw(df_GMaxw):
+def plot_GMaxw(df_GMaxw, units):
     m = df_GMaxw.modul
     fig1, ax1 = plt.subplots() #figsize=(8,0.75*4)
     df_GMaxw.plot(x='f', y=['{}_stor'.format(m)], ax=ax1, logx=True, ls='-', lw=2, color=['C0'])
     df_GMaxw.plot(x='f', y=['{}_loss'.format(m)], ax=ax1, logx=True, ls=':', lw=2, color=['C1'])
     df_GMaxw.plot(x='f', y=['{}_relax'.format(m)], ax=ax1, logx=True, ls='--', lw=2, color=['C2'])
-    ax1.set_xlabel('Frequency (Hz)')
-    ax1.set_ylabel('Relaxation, storage and \n loss modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+    ax1.set_xlabel('Frequency ({})'.format(units['f']))
+    ax1.set_ylabel('Relaxation, storage and \n loss modulus ({})'.format(units['{}_stor'.format(m)]))
     fig1.show()
     
     #fig2, ax2 = plt.subplots()
     #df_GMaxw.plot(x='t', y=['E_relax'], ax=ax2, logx=True, ls='-', lw=2, color=['C0'])
     #ax2.set_xlabel('Time (s)')
-    #ax2.set_ylabel('Relaxation modulus (MPa)') #TODO: Make sure it makes sense to include units here...
+    #ax2.set_ylabel('Relaxation modulus ({})'.format(units['{}_relax'.format(m)]))
     #fig2.show()
 
     return fig1 #, fig2
     
 
-def plot_GMaxw_temp(df_temp):
+def plot_GMaxw_temp(df_temp, units):
     m = df_temp.modul
     fig, ax1 = plt.subplots()
     for i, (f, df) in enumerate(df_temp.groupby('f')):
@@ -473,8 +473,8 @@ def plot_GMaxw_temp(df_temp):
         df.plot(y='{}_loss'.format(m), x='T', ls=':', ax=ax1, label='', c='C{}'.format(i))
         df.plot(y='{}_relax'.format(m), x='T', ls='--', ax=ax1, c='C{}'.format(i), label='') #label='t = {:.0e} s'.format(1/f)
         
-    ax1.set_xlabel('Temperature (\N{DEGREE SIGN}C)')
-    ax1.set_ylabel('Relaxation, storage and \n loss modulus (MPa)')
+    ax1.set_xlabel('Temperature ({})'.format(units['T']))
+    ax1.set_ylabel('Relaxation, storage and \n loss modulus ({})'.format(units['{}_stor'.format(m)]))
     ax1.legend()
 
     fig.show()
@@ -485,8 +485,8 @@ def plot_GMaxw_temp(df_temp):
 def plot_param(prony_list, labels=None):
     df_list = []
     for i, prony in enumerate(prony_list):
-        df = prony['df_terms'][['tau', 'alpha']].copy()
-        df = df.set_index('tau')
+        df = prony['df_terms'][['tau_i', 'alpha_i']].copy()
+        df = df.set_index('tau_i')
         if labels:
             df.columns = [labels[i]]
         else:
