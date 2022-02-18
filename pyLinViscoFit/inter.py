@@ -23,8 +23,10 @@ from . import out
 Convenience classes and methods
 --------------------------------------------------------------------------------
 """
-
 class bcolors:
+    """
+    Color codes for printing strings.
+    """
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'
@@ -38,8 +40,10 @@ bcolors = bcolors()
 
 
 def generate_zip(files):
+    """
+    Generate zip archive from collection of dataframes and figures.
+    """
     mem_zip = io.BytesIO()
-
     with zipfile.ZipFile(mem_zip, mode="w",compression=zipfile.ZIP_DEFLATED) as zf:
         for name, data in files.items():
             pre = name.split(sep='_')[0]
@@ -51,11 +55,13 @@ def generate_zip(files):
             else:
                 fname = name
             zf.writestr(fname, data)
-
     return mem_zip.getvalue()
 
 
 def fig_bytes(fig):
+    """
+    Return figure object in bytes.
+    """
     buf = io.BytesIO()
     fig.savefig(buf, dpi = 600)
     return buf.getvalue()
@@ -66,22 +72,24 @@ def fig_bytes(fig):
 Widget class for Jupyter dashboard
 --------------------------------------------------------------------------------
 """
-
 class Widgets():
     """
-    Create widgets for GUI
+    Collection of widgets for Jupyter notebook dashboard.
     """
     def __init__(self):
         self.ini_variables()
         self.widgets()
         styles.format_fig()
         styles.format_HTML(self.out_html)
-        self.modul = 'E'
-
+        
 
     def ini_variables(self):
+        """
+        Default values for widgets.
+        """
         self.RefT = 0
         self.nprony = 0
+        self.modul = 'E'
 
 
     def widgets(self):
@@ -108,7 +116,6 @@ class Widgets():
         #Theory out
         self.out_theory = widgets.HTMLMath(value='')
         
-
         """
         ------------------------------------------------------------------------
         Subsection - Specify input and upload data
@@ -1106,7 +1113,8 @@ class Control(Widgets):
         with self.out_par:
             clear_output()
             #Plot comparison of Prony parameters
-            self.fig_coeff = prony.plot_param([self.prony, self.dict_prony[N]], ['initial', 'minimized'])
+            self.fig_coeff = prony.plot_param([self.prony, 
+                self.dict_prony[N]], ['initial', 'minimized'])
 
         #Add data to file package
         self.files['df_prony_min'] = out.to_csv(self.dict_prony[N]['df_terms'], 
