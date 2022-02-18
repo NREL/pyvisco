@@ -1,0 +1,10 @@
+matplotlib
+numpy
+pandas
+scipy
+ipython
+ipywidgets
+ipympl
+voila
+xlrd
+markdown
