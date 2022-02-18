@@ -1,3 +1,8 @@
+"""
+Collection of function to define figure style and html styles for Jupyter
+Notebooks.
+"""
+
 from ipympl.backend_nbagg import Canvas
 from IPython.display import display, HTML
 import matplotlib.pyplot as plt
@@ -5,6 +10,9 @@ import matplotlib.pyplot as plt
 #Define figure style
 #-----------------------------------------------------------------------------
 def format_fig():
+    """
+    Set matplotlib.pyplot.rcParams for figure style.
+    """
     #Set default colors
     #plt.rcParams['axes.prop_cycle'] = plt.cycler(color=sns.color_palette("colorblind")) #colorblind
 
@@ -51,7 +59,6 @@ def format_fig():
     #plt.rcParams['figure.constrained_layout.w_pad'] = 0.05
     #plt.rcParams['figure.constrained_layout.h_pad'] = 0.05
 
-
     #ipympl duplicate plot issue
     #https://issueexplorer.com/issue/matplotlib/ipympl/402
     plt.ioff()
@@ -63,6 +70,9 @@ def format_fig():
 
 
 def format_HTML(widget):
+    """
+    Set HTML styles for Jupyter Notebook layout.
+    """
     with widget:
         display(HTML("""
         <style>
@@ -79,8 +89,6 @@ def format_HTML(widget):
         </style>
         """
         ))
-
-
 
 # input::-webkit-outer-spin-button,
 # input::-webkit-inner-spin-button {
