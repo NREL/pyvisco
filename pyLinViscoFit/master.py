@@ -109,7 +109,7 @@ def fit_pwr(xdata, ydata):
     xdata : array-like
         x data to be fitted.
     ydata : array-like
-        x data to be fitted.
+        y data to be fitted.
 
     Returns
     -------
