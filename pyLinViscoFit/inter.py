@@ -892,29 +892,29 @@ class Control(Widgets):
         with self.out_aT:
             clear_output()
             display(self.w_loading)
-            try:
-                #Fit shift factors if not present or overwrite
-                if not isinstance(self.df_aT, pd.DataFrame) or self.cb_aT.value:
-                    self.df_aT = master.get_aT(self.df_raw, self.RefT)
+            #try:
+            #Fit shift factors if not present or overwrite
+            if not isinstance(self.df_aT, pd.DataFrame) or self.cb_aT.value:
+                self.df_aT = master.get_aT(self.df_raw, self.RefT)
 
-                #Assembly master curve
-                self.df_master = master.get_curve(self.df_raw, self.df_aT, self.RefT)
+            #Assembly master curve
+            self.df_master = master.get_curve(self.df_raw, self.df_aT, self.RefT)
 
-                #Plot figure
-                clear_output()
-                self.fig_master_shift, self.fig_master_shift_lax = master.plot_shift(
-                    self.df_raw, self.df_master, self.units)
+            #Plot figure
+            clear_output()
+            self.fig_master_shift, self.fig_master_shift_lax = master.plot_shift(
+                self.df_raw, self.df_master, self.units)
 
-                #Add data to file package 
-                self.files['fig_master_shift'] = self.fig_master_shift
-                self.files['df_master'] = out.to_csv(self.df_master, self.units)
-                self.files['df_aT'] = out.to_csv(self.df_aT, self.units)
+            #Add data to file package 
+            self.files['fig_master_shift'] = self.fig_master_shift
+            self.files['df_master'] = out.to_csv(self.df_master, self.units)
+            self.files['df_aT'] = out.to_csv(self.df_aT, self.units)
 
-                #Update widgets
-                self.b_shift.disabled = False
-                self.cb_ManShift.disabled = False
-            except (NameError, AttributeError):
-                    print('Raw and/or master dataframes are missing!')
+            #Update widgets
+            self.b_shift.disabled = False
+            self.cb_ManShift.disabled = False
+            # except (NameError, AttributeError):
+            #         print('Raw and/or master dataframes are missing!')
 
 
     #Shift functions

@@ -16,6 +16,34 @@ from scipy.optimize import curve_fit
 Methods to shift raw data into master curve based on shift factors
 --------------------------------------------------------------------------------
 """
+def pwr_y_noe(x, a, b):
+    """
+    Calculate the Power Law relation with a deviation term.
+    
+    Parameters
+    ----------
+    x : numeric
+        Input to Power Law relation.
+    a : numeric
+        Constant.
+    b : numeric
+        Exponent.
+    e : numeric
+        Deviation term.
+
+    Returns
+    -------
+    numeric
+        Output of Power Law relation.
+
+    Notes
+    -----
+    Power Law relation:
+    .. math:: y = a x^b + e
+    """
+    return a*x**b
+
+
 def pwr_y(x, a, b, e):
     """
     Calculate the Power Law relation with a deviation term.
@@ -72,6 +100,34 @@ def pwr_x(y, a, b, e):
     return ((y-e)/a)**(1/b)
 
 
+def fit_pwr(xdata, ydata):
+    """
+    Define bounds for curve fitting routine and fit power law.
+    
+    Parameters
+    ----------
+    xdata : array-like
+        x data to be fitted.
+    ydata : array-like
+        x data to be fitted.
+
+    Returns
+    -------
+    popt : array-like
+        Optimal values for the parameters.
+    pcov : 2D array
+        The estimated covariance of popt. The diagonals provide the variance 
+        of the parameter estimate.
+
+    See also
+    --------
+    scipy.optimize.curve_fit :  Non-linear least squares fit to a function.
+    """
+    bnd = ([-np.inf, -np.inf, -ydata.max()], [np.inf, np.inf, ydata.max()])
+    popt, pcov = curve_fit(pwr_y, xdata, ydata, bounds = bnd)
+    return popt, pcov
+
+
 def fit_at_pwr(df_raw, gb_ref, gb_shift):
     """
     Obtain shift factor between two measurement sets at different tempeatures.
@@ -121,11 +177,11 @@ def fit_at_pwr(df_raw, gb_ref, gb_shift):
     shift_ydata = gb.get_group(gb_shift)[_modul].values
 
     #Curve fit power law
-    ref_popt, ref_pcov = curve_fit(pwr_y, ref_xdata, ref_ydata, maxfev=10000)
-    shift_popt, shift_pcov = curve_fit(pwr_y, shift_xdata, shift_ydata, maxfev=10000)
+    ref_popt, ref_pcov = fit_pwr(ref_xdata, ref_ydata)
+    shift_popt, shift_pcov = fit_pwr(shift_xdata, shift_ydata)
 
     #Check and remove first measurement point if outlier
-    ref_popt_rem, ref_pcov_rem = curve_fit(pwr_y, ref_xdata[1:], ref_ydata[1:], maxfev=10000)
+    ref_popt_rem, ref_pcov_rem = fit_pwr(ref_xdata[1:], ref_ydata[1:]) 
     perr = np.sqrt(np.abs(np.diag(ref_pcov)))
     perr_rem = np.sqrt(np.abs(np.diag(ref_pcov_rem)))
     if all(perr_rem < perr):
@@ -133,7 +189,7 @@ def fit_at_pwr(df_raw, gb_ref, gb_shift):
         ref_xdata = ref_xdata[1:] 
         ref_ydata = ref_ydata[1:]
 
-    shift_popt_rem, shift_pcov_rem = curve_fit(pwr_y, shift_xdata[1:], shift_ydata[1:], maxfev=10000)
+    shift_popt_rem, shift_pcov_rem = fit_pwr(shift_xdata[1:], shift_ydata[1:]) 
     perr = np.sqrt(np.abs(np.diag(shift_pcov)))
     perr_rem = np.sqrt(np.abs(np.diag(shift_pcov_rem)))
     if all(perr_rem < perr):
