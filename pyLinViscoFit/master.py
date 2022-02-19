@@ -426,10 +426,10 @@ def plot_shift(df_raw, df_master, units):
 
         legend1 = ax1.legend(handlelength=1, handletextpad=0.1, fontsize=8)
         legend2 = ax2.legend(handlelength=1, handletextpad=0.1, fontsize=8)
-        for legend_handle in legend1.legendHandles:
-            legend_handle._legmarker.set_markersize(8)
-        for legend_handle in legend2.legendHandles:
-            legend_handle._legmarker.set_markersize(8)
+        # for legend_handle in legend1.legendHandles:
+        #     legend_handle._legmarker.set_markersize(8)
+        # for legend_handle in legend2.legendHandles:
+        #     legend_handle._legmarker.set_markersize(8)
         fig.show()
         return fig, ax
 
@@ -458,8 +458,8 @@ def plot_shift(df_raw, df_master, units):
         ax = (ax1, lax1)
 
         legend = ax1.legend(handlelength=1, handletextpad=0.1, fontsize=8)
-        for legend_handle in legend.legendHandles:
-            legend_handle._legmarker.set_markersize(8)
+        # for legend_handle in legend.legendHandles:
+        #     legend_handle._legmarker.set_markersize(8)
         fig.show()
         return fig, ax
 

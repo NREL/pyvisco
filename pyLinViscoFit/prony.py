@@ -669,7 +669,7 @@ def GMaxw_temp(shift_func, df_GMaxw, df_coeff, df_aT, freq = [1E-8, 1E-4, 1E0, 1
                 tan_del = np.interp(f, f_shift, df_GMaxw['tan_del'])
                 df = pd.DataFrame([[f, T, E_stor, E_loss, tan_del, E_relax]], 
                     columns=['f', 'T', stor, loss, 'tan_del', relax])
-                df_GMaxw_temp = df_GMaxw_temp.append(df)
+                df_GMaxw_temp = pd.concat([df_GMaxw_temp, df])
             else:
                 continue
             
@@ -777,8 +777,9 @@ def plot_param(prony_list, labels=None):
         else:
             df.columns = [prony['label']]
         df_list.append(df)
-
     df_bar = pd.concat(df_list, axis=1)
+    df_bar.sort_index(inplace = True)
+    
     fig, ax1 = plt.subplots(figsize=(8,0.75*4))
     df_bar.plot.bar(ax=ax1)
     xticklabels = [("{:.0e}".format(a)) for a in df_bar.index.tolist()]
