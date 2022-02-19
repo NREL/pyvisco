@@ -16,34 +16,6 @@ from scipy.optimize import curve_fit
 Methods to shift raw data into master curve based on shift factors
 --------------------------------------------------------------------------------
 """
-def pwr_y_noe(x, a, b):
-    """
-    Calculate the Power Law relation with a deviation term.
-    
-    Parameters
-    ----------
-    x : numeric
-        Input to Power Law relation.
-    a : numeric
-        Constant.
-    b : numeric
-        Exponent.
-    e : numeric
-        Deviation term.
-
-    Returns
-    -------
-    numeric
-        Output of Power Law relation.
-
-    Notes
-    -----
-    Power Law relation:
-    .. math:: y = a x^b + e
-    """
-    return a*x**b
-
-
 def pwr_y(x, a, b, e):
     """
     Calculate the Power Law relation with a deviation term.
