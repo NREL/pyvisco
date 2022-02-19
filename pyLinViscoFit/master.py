@@ -276,7 +276,7 @@ def get_curve(df_raw, df_aT, RefT):
     for S, df in df_raw.groupby('Set'):  
         aT = 10**(df_aT[df_aT['T'] == df['T_round'].iloc[0]]['log_aT'].values)
         fshift = aT * df['f_set']
-        df_shift = df_shift.append(fshift.to_frame())
+        df_shift = pd.concat([df_shift, fshift.to_frame()])
 
     if df_raw.domain == 'freq':
         df_master = df_raw[[stor, loss, "Set"]].copy()
@@ -522,7 +522,6 @@ def plot_shift_update(df_master, fig, ax):
         ax2.relim()
         ax2.autoscale_view()
     fig.canvas.draw_idle()
-    fig.canvas.flush_events()
     return fig
 
 

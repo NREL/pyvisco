@@ -913,7 +913,7 @@ class Control(Widgets):
                 #Update widgets
                 self.b_shift.disabled = False
                 self.cb_ManShift.disabled = False
-            except NameError:
+            except (NameError, AttributeError):
                     print('Raw and/or master dataframes are missing!')
 
 
