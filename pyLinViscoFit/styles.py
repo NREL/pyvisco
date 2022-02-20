@@ -69,26 +69,18 @@ def format_fig():
     #Canvas.resizable.default_value = False
 
 
-def format_HTML(widget):
-    """
-    Set HTML styles for Jupyter Notebook layout.
-    """
-    with widget:
-        display(HTML("""
-        <style>
-        .text_cell_render p {
-            text-align: justify;
-            text-justify: inter-word;
-        }
-        hr {
-            background-color: #1a1a1a;
-            border: none;
-            height: 1px;
-            margin: 1em 0;
-        }
-        </style>
-        """
-        ))
+# def format_HTML(widget):
+#     """
+#     Set HTML styles for Jupyterlab layout.
+#     """
+#     with widget:
+#         display(HTML("""
+#         <style>
+#             .jp-Cell {max-width: 1024px !important; margin: auto; }
+#             .jp-Cell-inputWrapper {max-width: 1024px !important; margin: auto;}
+#             .jp-MarkdownOutput p {text-align: justify; text-justify: inter-word;}
+#         </style>
+#         """))
 
 # input::-webkit-outer-spin-button,
 # input::-webkit-inner-spin-button {

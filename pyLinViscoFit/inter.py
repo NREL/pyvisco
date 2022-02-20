@@ -80,7 +80,7 @@ class Widgets():
         self.ini_variables()
         self.widgets()
         styles.format_fig()
-        styles.format_HTML(self.out_html)
+        #styles.format_HTML(self.out_html)
         
 
     def ini_variables(self):
@@ -99,7 +99,16 @@ class Widgets():
         _height = 'auto'
         _width = 'auto'
         _width_b = '200px'
-        _layout = {'width' : '100%', 'justify_content' : 'space-between'}
+        _layout = {'width' : '100%', 
+                   'display' : 'inline-flex',
+                   'justify_content' : 'space-between',
+                   'flex_flow' : 'row wrap'}
+
+        _layout_around = _layout.copy()
+        _layout_around['justify_content'] = 'space-around'
+
+        _layout_left = _layout.copy()
+        _layout_left['justify_content'] = 'flex-start'
 
         """
         ------------------------------------------------------------------------
@@ -258,9 +267,8 @@ class Widgets():
 
         #Layout
         _valid = widgets.HBox([self.v_modulus, self.v_aT, self.v_WLF], 
-            layout = widgets.Layout(width = '100%'))
-        self.w_check_inp = widgets.VBox([_valid],
-            layout = widgets.Layout(width = '100%')) 
+            layout = widgets.Layout(**_layout_around))
+        self.w_check_inp = widgets.VBox([_valid]) 
 
 
         """
@@ -302,8 +310,15 @@ class Widgets():
         self.out_aT_man = widgets.Output()
 
         #Layout
-        _aT = widgets.HBox([self.b_aT, self.cb_aT, self.cb_ManShift])
-        self.w_aT = widgets.VBox([_aT, self.out_aT, self.out_aT_man])
+        _aT = widgets.HBox([self.cb_aT, self.cb_ManShift],
+            layout = widgets.Layout(**_layout_around))
+        _aT_b = widgets.HBox([self.b_aT],  
+            layout = widgets.Layout(**_layout_around))
+        _aT_out = widgets.HBox([self.out_aT],  
+            layout = widgets.Layout(**_layout_around))
+        _aT_out_man = widgets.HBox([self.out_aT_man],  
+            layout = widgets.Layout(**_layout_around))
+        self.w_aT = widgets.VBox([_aT, _aT_b, _aT_out, _aT_out_man])
 
 
         #Shift functions
@@ -329,8 +344,11 @@ class Widgets():
         self.out_shift = widgets.Output()
 
         #Layout
-        _shift = widgets.HBox([self.b_shift, self.cb_WLF])
-        self.w_shift = widgets.VBox([_shift, self.out_shift])
+        _shift = widgets.HBox([self.cb_WLF], 
+            layout = widgets.Layout(**_layout_around))
+        _shift_b = widgets.HBox([self.b_shift],  
+            layout = widgets.Layout(**_layout_around))
+        self.w_shift = widgets.VBox([_shift, _shift_b, self.out_shift])
 
         """
         ------------------------------------------------------------------------
@@ -350,7 +368,11 @@ class Widgets():
         self.out_smooth = widgets.Output()
 
         #Layout
-        self.w_smooth = widgets.VBox([self.b_smooth, self.out_smooth])
+        _smooth_out = widgets.HBox([self.out_smooth],  
+            layout = widgets.Layout(**_layout_around))
+        _smooth_b = widgets.HBox([self.b_smooth],  
+            layout = widgets.Layout(**_layout_around))
+        self.w_smooth = widgets.VBox([_smooth_b, _smooth_out])
 
 
         #Discretization
@@ -397,7 +419,9 @@ class Widgets():
         #Layout
         _dis = widgets.HBox([self.rb_dis, self.rb_dis_win, self.it_nprony],  
             layout = widgets.Layout(**_layout))
-        self.w_dis = widgets.VBox([_dis, self.b_dis, self.out_dis])
+        _dis_b = widgets.HBox([self.b_dis],  
+            layout = widgets.Layout(**_layout_around))
+        self.w_dis = widgets.VBox([_dis, _dis_b, self.out_dis])
 
 
         #Fit Prony parameter
@@ -414,8 +438,11 @@ class Widgets():
         self.out_prony = widgets.Output()
 
         #Layout
-        self.w_out_fit_prony = widgets.HBox([self.out_fit, self.out_prony],  
-            layout = widgets.Layout(width = '100%')) 
+        _fit_b = widgets.HBox([self.b_fit],  
+            layout = widgets.Layout(**_layout_around))
+        _out_fit_prony = widgets.HBox([self.out_fit, self.out_prony],  
+            layout = widgets.Layout(**_layout_around)) 
+        self.w_out_fit_prony = widgets.VBox([_fit_b, _out_fit_prony])
 
 
         #Generalized Maxwell model
@@ -432,8 +459,11 @@ class Widgets():
         self.out_GMaxw_temp = widgets.Output()
 
         #Layout
-        self.w_out_GMaxw = widgets.HBox([self.out_GMaxw_freq, self.out_GMaxw_temp],  
-            layout = widgets.Layout(width = '100%')) 
+        _GMaxw_b = widgets.HBox([self.b_GMaxw],  
+            layout = widgets.Layout(**_layout_around))
+        _out_GMaxw = widgets.HBox([self.out_GMaxw_freq, self.out_GMaxw_temp],  
+            layout = widgets.Layout(**_layout_around)) 
+        self.w_out_GMaxw = widgets.VBox([_GMaxw_b, _out_GMaxw])
 
         """
         ------------------------------------------------------------------------
@@ -454,9 +484,16 @@ class Widgets():
         self.out_par = widgets.Output()
 
         #Layout
+        _opt_b = widgets.HBox([self.b_opt],  
+            layout = widgets.Layout(**_layout_around))
+        _opt_dro = widgets.HBox([self.out_dro],  
+            layout = widgets.Layout(**_layout_around))
         _minProny = widgets.HBox([self.out_opt, self.out_res],  
-            layout = widgets.Layout(width = '100%')) 
-        self.w_out_fit_min = widgets.VBox([self.out_dro, _minProny, self.out_par])
+            layout = widgets.Layout(**_layout_around)) 
+        _opt_par = widgets.HBox([self.out_par],  
+            layout = widgets.Layout(**_layout_around))
+        self.w_out_fit_min = widgets.VBox([_opt_b, _opt_dro, 
+            _minProny, _opt_par])
 
 
         """
@@ -480,6 +517,17 @@ class Widgets():
  
         #Output widgets for HTML content
         self.out_html = widgets.Output()
+
+        #Layout
+        _down_b = widgets.HBox([self.db_zip],  
+            layout = widgets.Layout(**_layout_around))
+        _down_out = widgets.HBox([self.out_html],  
+            layout = widgets.Layout(**_layout_around))
+        self.w_out_down = widgets.VBox([_down_b, _down_out])
+
+        self.w_reload = widgets.HBox([self.b_reload],  
+            layout = widgets.Layout(**_layout_around))
+
 
 
     """
