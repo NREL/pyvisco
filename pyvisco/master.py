@@ -38,14 +38,13 @@ def pwr_y(x, a, b, e):
 
     Notes
     -----
-    Power Law relation:
-    .. math:: y = a x^b + e
+    Power Law relation: :math:`y = a x^b + e`
     """
     return a*x**b+e
 
 
 def pwr_x(y, a, b, e):
-    """
+    r"""
     Calculate the inverse Power Law relation with a deviation term.
     
     Parameters
@@ -66,8 +65,7 @@ def pwr_x(y, a, b, e):
 
     Notes
     -----
-    Inverse Power Law relation:
-    .. math:: x = \left(\frac{y-e}{a}\right)^{\frac{1}{b}}
+    Inverse Power Law relation: :math:`x=\left(\frac{y-e}{a}\right)^{\frac{1}{b}}`
     """
     return ((y-e)/a)**(1/b)
 

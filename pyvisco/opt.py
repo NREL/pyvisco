@@ -26,13 +26,13 @@ def nprony(df_master, prony_series, window='min', opt = 1.5):
         Contains the Prony series parameters of the initial fit.
     window : {'min', 'round', 'exact'}
         Defines the location of the discretization of the relaxation times.
-        'exact' : use whole window of the experimental data and 
-                  logarithmically space the relaxation times between
-        'round' : round the minimum and maximum values of the experimental data
-                  to the nearest base 10 number and logarithmically space the 
-                  remaining relaxation times between the rounded numbers
-        'min'   : Position of relaxation times is optimized during minimization
-                  routine to reduce the number of Prony terms.
+        - 'exact' : use whole window of the experimental data and logarithmically 
+        space the relaxation times between
+        - 'round' : round the minimum and maximum values of the experimental data
+        to the nearest base 10 number and logarithmically space the 
+        remaining relaxation times between the rounded numbers
+        - 'min'   : Position of relaxation times is optimized during minimization
+        routine to reduce the number of Prony terms.
     opt : numeric
         Multiplier for the inital least squares residual to suggest an optimal 
         number of Prony terms: (R_opt)^2 = opt * (R_0)^2

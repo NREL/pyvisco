@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-"""Collection of functions to identify Prony series parameters of linear 
+"""Collection of submodules to identify Prony series parameters of linear 
 viscoelastic materials from measurements in either the time (relaxation tests) 
 or frequency domain (DMTA).
 """
 
-__version__ = '0.0.1'
+__version__ = '0.9.0'
 
 from . import load
 from . import shift

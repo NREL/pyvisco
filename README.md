@@ -1,4 +1,10 @@
-# Prony series identification for linear viscoelastic material models
+# pyvisco
+
+pyvisco is a python library that supports Prony series identification for 
+linear viscoelastic material models.
+
+Documentation is available at 
+[pyvisco documentation](https://github.com/martin-springer/LinViscoFit/docs/_build/html/index.html).
 
 > Note: This repository is currently in development!
 
@@ -15,6 +21,8 @@ An optional minimization routine is provided to reduce the number of Prony eleme
 
 ## Usage
 The easiest way of using this code is through an interactive Jupyter notebook that provides a graphical user interface to upload the experimental data, perform the curve fitting procedure, and download the obtained Prony series parameters. Click the link below to start the web application.
+
+[![Heroku CI Status](https://heroku-badge.herokuapp.com/?app=lin-visco-fit)](https://lin-visco-fit.herokuapp.com)
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/martin-springer/LinViscoFit/HEAD?urlpath=voila%2Frender%2FLinViscoFit.ipynb)
 

@@ -1225,8 +1225,8 @@ class Control(Widgets):
         
         Works in Jupyter notebook and voila.
 
-        Reference
-        ---------
+        References
+        ----------
         https://github.com/voila-dashboards/voila/issues/711
         """
         if isinstance(data, str):

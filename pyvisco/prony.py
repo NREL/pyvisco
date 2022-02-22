@@ -28,13 +28,13 @@ def discretize(df_master, window='round', nprony=0):
          Contains the master curve data.
     window : {'round', 'exact', 'min'}
         Defines the location of the discretization of the relaxation times.
-        'exact' : Use whole window of the experimental data and 
-                  logarithmically space the relaxation times inbetween.
-        'round' : Round the minimum and maximum values of the experimental data
-                  to the nearest base 10 number and logarithmically space the 
-                  remaining relaxation times inbetween the rounded numbers
-        'min'   : Position of relaxation times is optimized during minimization
-                  routine to reduce the number of Prony terms.
+        - 'exact' : Use whole window of the experimental data and logarithmically 
+        space the relaxation times inbetween.
+        - 'round' : Round the minimum and maximum values of the experimental data
+        to the nearest base 10 number and logarithmically space the 
+        remaining relaxation times inbetween the rounded numbers
+        - 'min'   : Position of relaxation times is optimized during minimization
+        routine to reduce the number of Prony terms.
     nprony : numeric, default = 0
         Number of Prony terms to be used for the discretization. The number
         of Prony terms and the number of relaxation times is equal. If no number
@@ -779,7 +779,7 @@ def plot_param(prony_list, labels=None):
         df_list.append(df)
     df_bar = pd.concat(df_list, axis=1)
     df_bar.sort_index(inplace = True)
-    
+
     fig, ax1 = plt.subplots(figsize=(8,0.75*4))
     df_bar.plot.bar(ax=ax1)
     xticklabels = [("{:.0e}".format(a)) for a in df_bar.index.tolist()]

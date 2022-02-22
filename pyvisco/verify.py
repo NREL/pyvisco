@@ -14,7 +14,7 @@ def load_prony_ANSYS(filepath):
     Parameters
     ----------
     filepath : str
-        Location and file name of ANSYS material card file (*.MPL)
+        Location and file name of ANSYS material card file (.MPL)
 
     Returns
     -------

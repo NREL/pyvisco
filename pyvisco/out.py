@@ -11,16 +11,13 @@ def add_units(df, units, index_label=None):
     A multiindex pandas dataframe is created. The first header row contains
     the physical quantities and the second row the corresponding physical units.
 
-    
     Parameters
     ----------
     df : pandas.DataFrame
         Units will be added to this dataframe.
-
     units : dict of {str : str}
         Contains the names of the physical quantities as key and 
         the corresponding names of the units as item.
-
     index_label : str
         If index_label is specified, a name for the row index will be included
         in the multiindex column header.
@@ -30,8 +27,7 @@ def add_units(df, units, index_label=None):
     df_out : pandas.DataFrame
         Dataframe with a multiindex colum header containing the physical units.
 
-
-    See Also:
+    See also:
     ---------
     out.to_csv : Parent function of current function.
     """
@@ -56,20 +52,16 @@ def to_csv(df, units, index_label=None, filepath=None):
     If filepath is not specified a bytes object containing the csv file data
     is returned.
 
-    
     Parameters
     ----------
     df : pandas.DataFrame
         Dataframe to be written to csv file.
-
     units : dict of {str : str}
         Contains the names of the physical quantities as key and 
         the corresponding names of the units as item.
-
     index_label : str
         If index_label is specified, a name for the row index will be included
         in the multiindex column header.
-
     filepath : str, default = None
         Filepath to storage location of the new csv file.
 
