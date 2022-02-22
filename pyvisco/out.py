@@ -27,8 +27,8 @@ def add_units(df, units, index_label=None):
     df_out : pandas.DataFrame
         Dataframe with a multiindex colum header containing the physical units.
 
-    See also:
-    ---------
+    See also
+    --------
     out.to_csv : Parent function of current function.
     """
     variables = df.columns.get_level_values(0)

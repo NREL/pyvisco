@@ -236,8 +236,8 @@ def get_aT(df_raw, RefT):
         Contains the decadic logarithm of the shift factors 'log_aT'
         and the corresponding temperature values 'T' in degree Celsius.
 
-    See also:
-    ---------
+    See also
+    --------
     load.Eplexor_raw : Returns df_raw from Eplexor Excel file.
     load.user_raw: Returns df_raw from csv file.
     """
@@ -286,8 +286,8 @@ def get_curve(df_raw, df_aT, RefT):
     df_master : pandas.DataFrame
         Contains the master curve data.
 
-    See also:
-    ---------
+    See also
+    --------
     load.Eplexor_raw : Returns df_raw from Eplexor Excel file.
     load.user_raw: Returns df_raw from csv file.
     master.get_aT : Returns df_aT.

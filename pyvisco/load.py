@@ -29,23 +29,25 @@ def conventions(modul):
     Only the tensile moduli are summarized in the table below. For shear modulus 
     data, replace 'E' with 'G', e.g. 'E_relax' -> 'G_relax'.
 
-    | Physical quantity        | Variable   | Unit                  |
-    | :---------------------   | :--------- | :-------------------: |
-    | Relaxation modulus:      | `E_relax`  | `[Pa, kPa, MPa, GPa]` |
-    | Storage modulus:         | `E_stor`   | `[Pa, kPa, MPa, GPa]` |
-    | Loss modulus:            | `E_loss`   | `[Pa, kPa, MPa, GPa]` |
-    | Complex modulus:         | `E_comp`   | `[Pa, kPa, MPa, GPa]` |
-    | Loss factor:             | `tan_del`  | `-`                   |
-    | Instantaneous modulus:   | `E_0`      | `[Pa, kPa, MPa, GPa]` |
-    | Equilibrium modulus:     | `E_inf`    | `[Pa, kPa, MPa, GPa]` |
-    | Angular frequency:       | `omega`    | `rad/s`               |
-    | Frequency:               | `f`        | `Hz`                  |
-    | Time:                    | `t`        | `s`                   |
-    | Temperature:             | `T`        | `°C`                  |
-    | Relaxation times:        | `tau_i`    | `s`                   |
-    | Relaxation moduli:       | `E_i`      | `[Pa, kPa, MPa, GPa]` |
-    | Norm. relaxation moduli: | `alpha_i`  | `-`                   |
-    | Shift factor:            | `log_aT`   | `-`                   |
+    ========================  ========  =================== 
+    Physical quantity         Variable  Unit                  
+    ========================  ========  =================== 
+    Relaxation modulus:       E_relax   [Pa, kPa, MPa, GPa] 
+    Storage modulus:          E_stor    [Pa, kPa, MPa, GPa] 
+    Loss modulus:             E_loss    [Pa, kPa, MPa, GPa] 
+    Complex modulus:          E_comp    [Pa, kPa, MPa, GPa] 
+    Loss factor:              tan_del   -                   
+    Instantaneous modulus:    E_0       [Pa, kPa, MPa, GPa] 
+    Equilibrium modulus:      E_inf     [Pa, kPa, MPa, GPa] 
+    Angular frequency:        omega     rad/s               
+    Frequency:                f         Hz                  
+    Time:                     t         s                   
+    Temperature:              T         °C                  
+    Relaxation times:         tau_i     s                   
+    Relaxation moduli:        E_i       [Pa, kPa, MPa, GPa] 
+    Norm. relaxation moduli:  alpha_i   -                   
+    Shift factor:             log_aT    -        
+    ========================  ========  ===================            
     """
     m = modul
     conv = {'f' : ['Hz'],
@@ -119,8 +121,8 @@ def prep_csv(data):
         Contains the names of the physical quantities as key and 
         the corresponding names of the units as item.
 
-    See Also:
-    ---------
+    See also
+    --------
     load.file : Returns bytes object to be used as input parameter `data`.
     """
     df = pd.read_csv(io.BytesIO(data), header=[0,1])
@@ -154,8 +156,8 @@ def prep_excel(data):
         Contains the names of the physical quantities as key and 
         the corresponding names of the units as item.
 
-    See Also:
-    ---------
+    See also
+    --------
     load.file : Returns bytes object to be used as input parameter `data`.
     """
     df = pd.read_excel(io.BytesIO(data), 'Exported Data', header=[0,1], na_values='---')
@@ -301,15 +303,15 @@ def user_raw(data, domain, modul):
     https://github.com/martin-springer/LinViscoFit/tree/main/examples
 
     Various examples for file headers:
-    | ---------- | --------------------------- | --------------------------- |
-    | Domain     | Tensile Modulus             | Shear Modulus               | 
-    | :--------- | :-------------------------- | :-------------------------- |
-    | Frequency  | `f, E_stor, E_loss, T, Set` | `f, G_stor, G_loss, T, Set` |
-    |            | `Hz, MPa, MPa, C, -`        | `Hz, GPa, GPa, C, -`        |
-    | ---------- | --------------------------- | --------------------------- |
-    | Time :     | `t, E_relax, T, Set`        | `t, G_relax, T, Set`        |
-    |            | `s, MPa, C, -`              | `s, GPa, C, -`              |
-    | ---------- | --------------------------- | --------------------------- |
+
+    ========= === ===========================  =========================== 
+    Domain    Row Tensile Modulus              Shear Modulus                
+    ========= === ===========================  =========================== 
+    Frequency 1   f, E_stor, E_loss, T, Set    f, G_stor, G_loss, T, Set
+    Frequency 2   Hz, MPa, MPa, C, -           Hz, GPa, GPa, C, -       
+    Time      1   t, E_relax, T, Set           t, G_relax, T, Set     
+    Time      2   s, MPa, C, -                 s, GPa, C, -            
+    ========= === ===========================  =========================== 
     """
     df_raw, units = prep_csv(data)
 
@@ -476,15 +478,15 @@ def user_master(data, domain, RefT, modul):
     https://github.com/martin-springer/LinViscoFit/tree/main/examples
 
     Various examples for file headers:
-    | ---------- | ------------------- | ------------------- |
-    | Domain     | Tensile Modulus     | Shear Modulus       | 
-    | :--------- | :------------------ | :------------------ |
-    | Frequency  | `f, E_stor, E_loss` | `f, G_stor, G_loss` |
-    |            | `Hz, MPa, MPa`      | `Hz, GPa, GPa`      |
-    | ---------- | --------------------| --------------------|
-    | Time :     | `t, E_relax`        | `t, G_relax`        |
-    |            | `s, MPa`            | `s, GPa`            |
-    | ---------- | --------------------| --------------------|
+
+    =========  ===  ===================  =========================== 
+    Domain     Row  Tensile Modulus      Shear Modulus                
+    =========  ===  ===================  =========================== 
+    Frequency  1    f, E_stor, E_loss    f, G_stor, G_loss
+    Frequency  2    Hz, MPa, MPa         Hz, GPa, GPa     
+    Time       1    t, E_relax           t, G_relax       
+    Time       2    s, MPa               s, GPa           
+    =========  ===  ===================  =========================== 
     """
     df_master, units = prep_csv(data)
 
@@ -547,8 +549,14 @@ def user_shift(data_shift):
 
     Notes
     -----
-    Example file header:  1st row -> T, log_aT
-                          2nd row -> C, -
+    Example file header:  
+
+        ===  =========
+        Row  Header
+        ===  =========
+        1    T, log_aT
+        2    C, -
+        ===  =========
 
     Example input files can be found here: 
     https://github.com/martin-springer/LinViscoFit/tree/main/examples

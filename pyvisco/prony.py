@@ -240,8 +240,8 @@ def split_x0(func):
     -------
     split : function
 
-    See also:
-    ---------
+    See also
+    --------
     prony.ls_res : Function to be wrapped during minimization of Prony terms.
     """
     def split(*args):
@@ -627,8 +627,8 @@ def GMaxw_temp(shift_func, df_GMaxw, df_coeff, df_aT, freq = [1E-8, 1E-4, 1E0, 1
         Contains the Generalized Maxwell model data for a wide range of 
         temperatures at the specified frequencies.
 
-    See also:
-    ---------
+    See also
+    --------
     shift.fit_WLF : Returns WLF shift functions.
     shift.fit_poly : Returns polynomial shift functions of degree 1 to 4.
     """

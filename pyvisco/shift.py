@@ -133,8 +133,8 @@ def fit_WLF(RefT, df_aT):
         Contains the necessary parameters to calculate the WLF
         equation (RefT, WLF_C1, WLF_C2).
 
-    See also:
-    ---------
+    See also
+    --------
     shift.WLF : Calculates the WLF equation.
 
     Note:
