@@ -1,0 +1,369 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pyvisco.shift &#8212; pyvisco  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" href="../_static/css/functions.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/css/methods.css" type="text/css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyvisco.styles" href="pyvisco.styles.html" />
+    <link rel="prev" title="pyvisco.prony" href="pyvisco.prony.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyvisco.shift">
+<span id="pyvisco-shift"></span><h1>pyvisco.shift<a class="headerlink" href="#module-pyvisco.shift" title="Permalink to this headline">¶</a></h1>
+<p>Collection of functions to apply the time-temperature superposition
+principle to create a master curve from measurements performed at different
+temperatures.</p>
+<p class="rubric">Functions</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyvisco.shift.WLF" title="pyvisco.shift.WLF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WLF</span></code></a>(Temp, RefT, WLF_C1, WLF_C2)</p></td>
+<td><p>Calculate the Williams-Landel-Ferry (WLF) equation [1].</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyvisco.shift.fit_WLF" title="pyvisco.shift.fit_WLF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_WLF</span></code></a>(RefT, df_aT)</p></td>
+<td><p>Fit the Williams-Landel-Ferry (WLF) equation [1] to a set of shift factors.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyvisco.shift.fit_poly" title="pyvisco.shift.fit_poly"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_poly</span></code></a>(df_aT)</p></td>
+<td><p>Fit polynomial functions of degree 1 to 4 to a set of shift factors.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyvisco.shift.plot" title="pyvisco.shift.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>(df_aT, df_WLF, df_C)</p></td>
+<td><p>Plot shift factors and shift functions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyvisco.shift.poly1" title="pyvisco.shift.poly1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">poly1</span></code></a>(x, C0, C1)</p></td>
+<td><p>Calculate a polynomial function of degree 1 with a single variable 'x'.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyvisco.shift.poly2" title="pyvisco.shift.poly2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">poly2</span></code></a>(x, C0, C1, C2)</p></td>
+<td><p>Calculate a polynomial function of degree 2 with a single variable 'x'.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyvisco.shift.poly3" title="pyvisco.shift.poly3"><code class="xref py py-obj docutils literal notranslate"><span class="pre">poly3</span></code></a>(x, C0, C1, C2, C3)</p></td>
+<td><p>Calculate a polynomial function of degree 3 with a single variable 'x'.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyvisco.shift.poly4" title="pyvisco.shift.poly4"><code class="xref py py-obj docutils literal notranslate"><span class="pre">poly4</span></code></a>(x, C0, C1, C2, C3, C4)</p></td>
+<td><p>Calculate a polynomial function of degree 4 with a single variable 'x'.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.shift.WLF">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.shift.</span></span><span class="sig-name descname"><span class="pre">WLF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RefT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">WLF_C1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">WLF_C2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.shift.WLF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Williams-Landel-Ferry (WLF) equation [1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Temp</strong> (<em>numeric</em>) – Evaluation temperature of the shift factor.</p></li>
+<li><p><strong>RefT</strong> (<em>numeric</em>) – Reference temperature chosen to construct the master curve.</p></li>
+<li><p><strong>WLF_C1</strong> (<em>numeric</em>) – Empirical constants. (Obtained from fitting the shift factor a_T)</p></li>
+<li><p><strong>WLF_C2</strong> (<em>numeric</em>) – Empirical constants. (Obtained from fitting the shift factor a_T)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>log_aT</strong> – The decadic logarithm of the WLF shift factor.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numeric</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>[1] Williams, Malcolm L.; Landel, Robert F.; Ferry, John D. (1955).
+“The Temperature Dependence of Relaxation Mechanisms in Amorphous Polymers
+and Other Glass-forming Liquids”. J. Amer. Chem. Soc. 77 (14): 3701-3707.
+doi:10.1021/ja01619a008</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.shift.poly1">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.shift.</span></span><span class="sig-name descname"><span class="pre">poly1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.shift.poly1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a polynomial function of degree 1 with a single variable ‘x’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numeric</em>) – Input variable.</p></li>
+<li><p><strong>C0</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+<li><p><strong>C1</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Result of the polynomial function.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numeric</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.shift.poly2">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.shift.</span></span><span class="sig-name descname"><span class="pre">poly2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.shift.poly2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a polynomial function of degree 2 with a single variable ‘x’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numeric</em>) – Input variable.</p></li>
+<li><p><strong>C0</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+<li><p><strong>C1</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+<li><p><strong>C2</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Result of the polynomial function.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numeric</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.shift.poly3">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.shift.</span></span><span class="sig-name descname"><span class="pre">poly3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.shift.poly3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a polynomial function of degree 3 with a single variable ‘x’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numeric</em>) – Input variable.</p></li>
+<li><p><strong>C0</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+<li><p><strong>C1</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+<li><p><strong>C2</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+<li><p><strong>C3</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Result of the polynomial function.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numeric</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.shift.poly4">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.shift.</span></span><span class="sig-name descname"><span class="pre">poly4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.shift.poly4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate a polynomial function of degree 4 with a single variable ‘x’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numeric</em>) – Input variable.</p></li>
+<li><p><strong>C0</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+<li><p><strong>C1</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+<li><p><strong>C2</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+<li><p><strong>C3</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+<li><p><strong>C4</strong> (<em>numeric</em>) – Polynomial coefficients</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Result of the polynomial function.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numeric</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.shift.fit_WLF">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.shift.</span></span><span class="sig-name descname"><span class="pre">fit_WLF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">RefT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_aT</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.shift.fit_WLF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the Williams-Landel-Ferry (WLF) equation [1] to a set of shift factors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>RefT</strong> (<em>numeric</em>) – Reference temperature chosen to construct the master curve.</p></li>
+<li><p><strong>df_aT</strong> (<em>pandas.DataFrame</em>) – Contains the decadic logarithm of the shift factors ‘log_aT’
+and the corresponding temperature values ‘T’ in degree Celsius.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – Contains the necessary parameters to calculate the WLF
+equation (RefT, WLF_C1, WLF_C2).</p></li>
+<li><p><em>See also</em></p></li>
+<li><p><em>———</em></p></li>
+<li><p><strong>shift.WLF</strong> (<em>Calculates the WLF equation.</em>)</p></li>
+<li><p><em>Note</em></p></li>
+<li><p><em>—–</em></p></li>
+<li><p><em>Too avoid large WLF coefficients in cases where the shift factors are nearing</em></p></li>
+<li><p><em>a straight line, an upper bound of 5000 is set in the fitting routine for the</em></p></li>
+<li><p><em>empirical coefficients. In this case, only the ratio between C1 and C2</em></p></li>
+<li><p><em>is of importance and should not affect the goodness of the fit significantly.</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<p>[1] Williams, Malcolm L.; Landel, Robert F.; Ferry, John D. (1955).
+“The Temperature Dependence of Relaxation Mechanisms in Amorphous Polymers
+and Other Glass-forming Liquids”. J. Amer. Chem. Soc. 77 (14): 3701-3707.
+doi:10.1021/ja01619a008</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.shift.fit_poly">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.shift.</span></span><span class="sig-name descname"><span class="pre">fit_poly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_aT</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.shift.fit_poly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit polynomial functions of degree 1 to 4 to a set of shift factors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df_aT</strong> (<em>pandas.DataFrame</em>) – Contains the decadic logarithm of the shift factors ‘log_aT’
+and the corresponding temperature values ‘T’ in degree Celsius.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>df_C</strong> (<em>pandas.DataFrame</em>) – Contains the coefficients to calculate the polynomial
+shift functions of degree 1 to 4 for temperatures in degree <strong>Celsius</strong>.</p></li>
+<li><p><strong>df_K</strong> (<em>pandas.DataFrame</em>) – Contains the coefficients to calculate the polynomial
+shift functions of degree 1 to 4 for temperatures in <strong>Kelvin</strong>.</p></li>
+<li><p><em>Note</em></p></li>
+<li><p><em>—–</em></p></li>
+<li><p><em>The coefficients of the polynomial shift funtions are dependent on the</em></p></li>
+<li><p><em>Temperature unit. Hence, two different dataframes are provided for</em></p></li>
+<li><p><em>temperatures described in Celsius and Kelvin. For temperatures in Kelvin,</em></p></li>
+<li><p><em>at least 5 significant figures should be used for the polynomial</em></p></li>
+<li><p><em>coefficients to obtain accurate results for the polynomial shift functions.</em></p></li>
+<li><p><em>The interconversion from degree Celsius (T_C) to Kelvin (T_K) is performed</em></p></li>
+<li><p><strong>as</strong> (<em>T_K = T_C + 273.15.</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.shift.plot">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.shift.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_aT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_WLF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_C</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.shift.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot shift factors and shift functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_aT</strong> (<em>pandas.DataFrame</em>) – Contains the decadic logarithm of the shift factors ‘log_aT’
+and the corresponding temperature values ‘T’ in degree Celsius.</p></li>
+<li><p><strong>df_WLF</strong> (<em>pandas.DataFrame</em>) – Contains the necessary parameters to calculate the WLF
+equation (RefT, WLF_C1, WLF_C2) in degree Celsius.</p></li>
+<li><p><strong>df_C</strong> (<em>pandas.DataFrame</em>) – Contains the coefficients to calculate the polynomial
+shift functions of degree 1 to 4 for temperatures in degree <strong>Celsius</strong>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib.pyplot.figure</em>) – Matplotlib figure instance.</p></li>
+<li><p><strong>df_shift</strong> (<em>pandasDataFrame</em>) – Contains the data used to create the plot.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pyvisco</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme_link.html">pyvisco</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.load.html">pyvisco.load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.master.html">pyvisco.master</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.opt.html">pyvisco.opt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.out.html">pyvisco.out</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.prony.html">pyvisco.prony</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pyvisco.shift</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.styles.html">pyvisco.styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.verify.html">pyvisco.verify</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.inter.html">pyvisco.inter</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../api.html">API Reference</a><ul>
+      <li>Previous: <a href="pyvisco.prony.html" title="previous chapter">pyvisco.prony</a></li>
+      <li>Next: <a href="pyvisco.styles.html" title="next chapter">pyvisco.styles</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Martin Springer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/_autosummary/pyvisco.shift.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

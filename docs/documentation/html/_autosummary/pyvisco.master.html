@@ -1,0 +1,507 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pyvisco.master &#8212; pyvisco  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" href="../_static/css/functions.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/css/methods.css" type="text/css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pyvisco.opt" href="pyvisco.opt.html" />
+    <link rel="prev" title="pyvisco.load" href="pyvisco.load.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pyvisco.master">
+<span id="pyvisco-master"></span><h1>pyvisco.master<a class="headerlink" href="#module-pyvisco.master" title="Permalink to this headline">¶</a></h1>
+<p>Collection of functions to prepare the master curve for the identification
+of the Prony series parameters. Methods are provided to shift the raw
+measurement data into a master curve and remove measurement outliers through
+smoothing of the master curve.</p>
+<p class="rubric">Functions</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyvisco.master.fit_at_pwr" title="pyvisco.master.fit_at_pwr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_at_pwr</span></code></a>(df_raw, gb_ref, gb_shift)</p></td>
+<td><p>Obtain shift factor between two measurement sets at different tempeatures.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyvisco.master.fit_pwr" title="pyvisco.master.fit_pwr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_pwr</span></code></a>(xdata, ydata)</p></td>
+<td><p>Define bounds for curve fitting routine and fit power law.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyvisco.master.get_aT" title="pyvisco.master.get_aT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_aT</span></code></a>(df_raw, RefT)</p></td>
+<td><p>Get shift factors for each temperature level in the raw measurement data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyvisco.master.get_curve" title="pyvisco.master.get_curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_curve</span></code></a>(df_raw, df_aT, RefT)</p></td>
+<td><p>Get master curve by shifting the individual measurement sets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyvisco.master.plot" title="pyvisco.master.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>(df_master, units)</p></td>
+<td><p>Plot master curve.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyvisco.master.plot_shift" title="pyvisco.master.plot_shift"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_shift</span></code></a>(df_raw, df_master, units)</p></td>
+<td><p>Plot raw measurement data and shifted master curve.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyvisco.master.plot_shift_update" title="pyvisco.master.plot_shift_update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_shift_update</span></code></a>(df_master, fig, ax)</p></td>
+<td><p>Upadate plot of raw measurement data and shifted master curve.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyvisco.master.plot_smooth" title="pyvisco.master.plot_smooth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_smooth</span></code></a>(df_master, units)</p></td>
+<td><p>Plot filtered and unfilterd master curve.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyvisco.master.pwr_x" title="pyvisco.master.pwr_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pwr_x</span></code></a>(y, a, b, e)</p></td>
+<td><p>Calculate the inverse Power Law relation with a deviation term.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyvisco.master.pwr_y" title="pyvisco.master.pwr_y"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pwr_y</span></code></a>(x, a, b, e)</p></td>
+<td><p>Calculate the Power Law relation with a deviation term.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyvisco.master.smooth" title="pyvisco.master.smooth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smooth</span></code></a>(df_master[, win])</p></td>
+<td><p>Remove outliers in measurement data by smoothing master curve.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.master.pwr_y">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.master.</span></span><span class="sig-name descname"><span class="pre">pwr_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.master.pwr_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Power Law relation with a deviation term.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>numeric</em>) – Input to Power Law relation.</p></li>
+<li><p><strong>a</strong> (<em>numeric</em>) – Constant.</p></li>
+<li><p><strong>b</strong> (<em>numeric</em>) – Exponent.</p></li>
+<li><p><strong>e</strong> (<em>numeric</em>) – Deviation term.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Output of Power Law relation.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numeric</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Power Law relation: <span class="math notranslate nohighlight">\(y = a x^b + e\)</span></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.master.pwr_x">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.master.</span></span><span class="sig-name descname"><span class="pre">pwr_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.master.pwr_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the inverse Power Law relation with a deviation term.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>numeric</em>) – Output of Power Law relation.</p></li>
+<li><p><strong>a</strong> (<em>numeric</em>) – Constant.</p></li>
+<li><p><strong>b</strong> (<em>numeric</em>) – Exponent.</p></li>
+<li><p><strong>e</strong> (<em>numeric</em>) – Deviation term.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Input to Power Law relation.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numeric</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Inverse Power Law relation: <span class="math notranslate nohighlight">\(x=\left(\frac{y-e}{a}\right)^{\frac{1}{b}}\)</span></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.master.fit_pwr">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.master.</span></span><span class="sig-name descname"><span class="pre">fit_pwr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xdata</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ydata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.master.fit_pwr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define bounds for curve fitting routine and fit power law.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xdata</strong> (<em>array-like</em>) – x data to be fitted.</p></li>
+<li><p><strong>ydata</strong> (<em>array-like</em>) – y data to be fitted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>popt</strong> (<em>array-like</em>) – Optimal values for the parameters.</p></li>
+<li><p><strong>pcov</strong> (<em>2D array</em>) – The estimated covariance of popt. The diagonals provide the variance
+of the parameter estimate.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">scipy.optimize.curve_fit</span></code></dt><dd><p>Non-linear least squares fit to a function.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.master.fit_at_pwr">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.master.</span></span><span class="sig-name descname"><span class="pre">fit_at_pwr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gb_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gb_shift</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.master.fit_at_pwr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obtain shift factor between two measurement sets at different tempeatures.</p>
+<p>The raw measurement data at each temperature level are fitted by a Power Law
+function. These Power Law functions improve the robustness of the
+shifting algorithm, because they functions smooth outliers and bridge
+possible gaps between the data sets. The intersection of the functions
+is calculated and used to obtain the shift factor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_raw</strong> (<em>pandas.DataFrame</em>) – Contains the processed raw measurement data.</p></li>
+<li><p><strong>gb_ref</strong> (<em>int</em>) – Dataframe ‘Set’ number of the reference measurement set.</p></li>
+<li><p><strong>gb_shift</strong> (<em>int</em>) – Dataframe ‘Set’ number of the measurement set that is shifted.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>log_aT</strong> – The decadic logarithm of the shift factor between the two measurement
+sets.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numeric</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>In certain circumstances the equilibration time between measurements at
+different temperature levels can be too short to reach a steady state
+leading to errors in the first data point of the measurement set.
+To account for such situation, tow Power law fits are conducted. The first
+fit contains all data points and the second fit drops the first data point.
+If dropping the data point increased the goodness of fit, this
+Power Law fit is used to calculate the shift factor.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.master.get_aT">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.master.</span></span><span class="sig-name descname"><span class="pre">get_aT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RefT</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.master.get_aT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get shift factors for each temperature level in the raw measurement data.</p>
+<p>A reference temperature is specified for which the master curve is created.
+Measurement sets below the desired reference temperatures are shifted to
+lower frequencies (longer time periods), whereas measurement sets at
+temperatures higher than the reference temperature are shifted to higher
+frequencies (shorter time periods).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_raw</strong> (<em>pandas.DataFrame</em>) – Contains the processed raw measurement data.</p></li>
+<li><p><strong>RefT</strong> (<em>int</em><em> or </em><em>float</em>) – Reference tempeature of the master curve in Celsius.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>df_aT</strong> (<em>pandas.DataFrame</em>) – Contains the decadic logarithm of the shift factors ‘log_aT’
+and the corresponding temperature values ‘T’ in degree Celsius.</p></li>
+<li><p><em>See also</em></p></li>
+<li><p><em>———</em></p></li>
+<li><p><strong>load.Eplexor_raw</strong> (<em>Returns df_raw from Eplexor Excel file.</em>)</p></li>
+<li><p><strong>load.user_raw</strong> (<em>Returns df_raw from csv file.</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.master.get_curve">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.master.</span></span><span class="sig-name descname"><span class="pre">get_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_aT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RefT</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.master.get_curve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get master curve by shifting the individual measurement sets.</p>
+<p>The master curve is created from the raw measurement data based on the
+provided shift factors for the specified reference temperature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_raw</strong> (<em>pandas.DataFrame</em>) – Contains the processed raw measurement data.</p></li>
+<li><p><strong>df_aT</strong> (<em>pandas.DataFrame</em>) – Contains the decadic logarithm of the shift factors ‘log_aT’
+and the corresponding temperature values ‘T’ in degree Celsius.</p></li>
+<li><p><strong>RefT</strong> (<em>int</em><em> or </em><em>float</em>) – Reference tempeature of the master curve in Celsius.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>df_master</strong> (<em>pandas.DataFrame</em>) – Contains the master curve data.</p></li>
+<li><p><em>See also</em></p></li>
+<li><p><em>———</em></p></li>
+<li><p><strong>load.Eplexor_raw</strong> (<em>Returns df_raw from Eplexor Excel file.</em>)</p></li>
+<li><p><strong>load.user_raw</strong> (<em>Returns df_raw from csv file.</em>)</p></li>
+<li><p><strong>master.get_aT</strong> (<em>Returns df_aT.</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.master.plot">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.master.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_master</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.master.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot master curve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_master</strong> (<em>pandas.DataFrame</em>) – Contains the master curve data.</p></li>
+<li><p><strong>units</strong> (<em>dict of {str : str}</em>) – Contains the names of the physical quantities as key and
+the corresponding names of the units as item.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>fig</strong> – Domain dependent plot of master curve.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matplotlib.pyplot.figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.master.plot_shift">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.master.</span></span><span class="sig-name descname"><span class="pre">plot_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_master</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.master.plot_shift" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot raw measurement data and shifted master curve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_raw</strong> (<em>pandas.DataFrame</em>) – Contains the processed raw measurement data.</p></li>
+<li><p><strong>df_master</strong> (<em>pandas.DataFrame</em>) – Contains the master curve data.</p></li>
+<li><p><strong>units</strong> (<em>dict of {str : str}</em>) – Contains the names of the physical quantities as key and
+the corresponding names of the units as item.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul>
+<li><p><strong>fig</strong> (<em>matplotlib.pyplot.figure</em>) – Plot of raw measurement data and master curve.</p></li>
+<li><p><strong>ax</strong> (<em>tuple</em>) –</p>
+<dl class="simple">
+<dt>Frequency domain: (ax1, lax1, ax2, lax2)</dt><dd><dl class="simple">
+<dt>ax1<span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>Axes object of storage modulus plot</p>
+</dd>
+<dt>lax1<span class="classifier">list of matplotlib.lines.Line2D</span></dt><dd><p>Line2D instances for easy update of xdata and ydata in
+storage modulus plot</p>
+</dd>
+<dt>ax2<span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>Axes object of loss modulus plot</p>
+</dd>
+<dt>lax2<span class="classifier">list of matplotlib.lines.Line2D</span></dt><dd><p>Line2D instances for easy update of xdata and ydata in
+loss modulus plot</p>
+</dd>
+</dl>
+</dd>
+<dt>Time domain: (ax1, lax1)</dt><dd><dl class="simple">
+<dt>ax1<span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>Axes object of relaxation modulus plot</p>
+</dd>
+<dt>lax1<span class="classifier">list of matplotlib.lines.Line2D</span></dt><dd><p>Line2D instances for easy update of xdata and ydata in
+relaxation modulus plot</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">master.plot_shift_update</span></code></dt><dd><p>Updates figure data.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.master.plot_shift_update">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.master.</span></span><span class="sig-name descname"><span class="pre">plot_shift_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_master</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.master.plot_shift_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upadate plot of raw measurement data and shifted master curve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_master</strong> (<em>pandas.DataFrame</em>) – Contains the master curve data.</p></li>
+<li><p><strong>fig</strong> (<em>matplotlib.pyplot.figure</em>) – Matplotlib figure instance.</p></li>
+<li><p><strong>ax</strong> (<em>tuple</em>) – <dl class="simple">
+<dt>Frequency domain: (ax1, lax1, ax2, lax2)</dt><dd><dl class="simple">
+<dt>ax1<span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>Axes object of storage modulus plot</p>
+</dd>
+<dt>lax1<span class="classifier">list of matplotlib.lines.Line2D</span></dt><dd><p>Line2D instances for easy update of xdata and ydata in
+storage modulus plot</p>
+</dd>
+<dt>ax2<span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>Axes object of loss modulus plot</p>
+</dd>
+<dt>lax2<span class="classifier">list of matplotlib.lines.Line2D</span></dt><dd><p>Line2D instances for easy update of xdata and ydata in
+loss modulus plot</p>
+</dd>
+</dl>
+</dd>
+<dt>Time domain: (ax1, lax1)</dt><dd><dl class="simple">
+<dt>ax1<span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>Axes object of relaxation modulus plot</p>
+</dd>
+<dt>lax1<span class="classifier">list of matplotlib.lines.Line2D</span></dt><dd><p>Line2D instances for easy update of xdata and ydata in
+relaxation modulus plot</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">master.plot_shift</span></code></dt><dd><p>Creates figure that is updated with this function.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.master.smooth">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.master.</span></span><span class="sig-name descname"><span class="pre">smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_master</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">win</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.master.smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove outliers in measurement data by smoothing master curve.</p>
+<p>A moving median filter with variable window size is applied to remove
+outliers from the measurement data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_master</strong> (<em>pandas.DataFrame</em>) – Contains the master curve data.</p></li>
+<li><p><strong>win</strong> (<em>int</em><em>, </em><em>default = 1</em>) – Window size of the median filter. A window size of 1 means that no
+filtering procedure is performed and the input data are returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>df_master</strong> – Contains the master curve data, including the filtered arrays.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyvisco.master.plot_smooth">
+<span class="sig-prename descclassname"><span class="pre">pyvisco.master.</span></span><span class="sig-name descname"><span class="pre">plot_smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_master</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyvisco.master.plot_smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot filtered and unfilterd master curve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_master</strong> (<em>pandas.DataFrame</em>) – Contains the filtered and unfiltered master curve data.</p></li>
+<li><p><strong>units</strong> (<em>dict of {str : str}</em>) – Contains the names of the physical quantities as key and
+the corresponding names of the units as item.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>fig</strong> – Plot displaying the filtered and unfilterd master curve data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>matplotlib.pyplot.figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pyvisco</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme_link.html">pyvisco</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.load.html">pyvisco.load</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pyvisco.master</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.opt.html">pyvisco.opt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.out.html">pyvisco.out</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.prony.html">pyvisco.prony</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.shift.html">pyvisco.shift</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.styles.html">pyvisco.styles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.verify.html">pyvisco.verify</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvisco.inter.html">pyvisco.inter</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../api.html">API Reference</a><ul>
+      <li>Previous: <a href="pyvisco.load.html" title="previous chapter">pyvisco.load</a></li>
+      <li>Next: <a href="pyvisco.opt.html" title="next chapter">pyvisco.opt</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Martin Springer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/_autosummary/pyvisco.master.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
