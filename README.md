@@ -4,7 +4,7 @@ pyvisco is a python library that supports Prony series identification for
 linear viscoelastic material models.
 
 Documentation is available at 
-[pyvisco.readthedocs.io](https://pivisco.readthedocs.io).
+[pyvisco.readthedocs.io](https://pyvisco.readthedocs.io).
 
 > Note: This repository is currently in development!
 
