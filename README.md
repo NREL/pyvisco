@@ -23,9 +23,14 @@ An optional minimization routine is provided to reduce the number of Prony eleme
 ## Usage
 The easiest way of using this code is through an interactive Jupyter notebook that provides a graphical user interface to upload the experimental data, perform the curve fitting procedure, and download the obtained Prony series parameters. Click the link below to start the web application.
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/{path}/pyvisco/HEAD?urlpath=voila%2Frender%2FLinViscoFit.ipynb)
+TBD: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/{path}/pyvisco/HEAD?urlpath=voila%2Frender%2FLinViscoFit.ipynb)
 
-Alternatively, a python package will be made available TBD!
+## Install using pip
+
+1. Clone or download the pyvisco repository.
+2. Navigate to repository: `cd pyvisco`
+3. Install via pip: `pip install .`
+4. Alternate installation development mode: `pip install -e .`
 
 ## Verification
 The Python implementation has been verified by comparing the obtained results with the curve fitting routine implemented in the commercial software package ANSYS APDL 2020 R1. Jupyter notebooks and supplementary files can be found in the verification subfolder.
