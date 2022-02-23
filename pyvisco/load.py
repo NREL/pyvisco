@@ -299,8 +299,7 @@ def user_raw(data, domain, modul):
     represents the coldest temperature followed by the second set (1) at the 
     next higher temperature level and so forth. 
     
-    Example input files can be found here: 
-    https://github.com/martin-springer/LinViscoFit/tree/main/examples
+    Example input files can be found here: (TBD)
 
     Various examples for file headers:
 
@@ -474,8 +473,7 @@ def user_master(data, domain, RefT, modul):
     Frequency domain data are provided in Hertz: [f] = Hz
     Time domain data are provided in seconds: [t] = s
     
-    Example input files can be found here: 
-    https://github.com/martin-springer/LinViscoFit/tree/main/examples
+    Example input files can be found here: (TBD)
 
     Various examples for file headers:
 
@@ -558,8 +556,7 @@ def user_shift(data_shift):
         2    C, -
         ===  =========
 
-    Example input files can be found here: 
-    https://github.com/martin-springer/LinViscoFit/tree/main/examples
+    Example input files can be found here: (TBD)
     """
     df_aT, units = prep_csv(data_shift)
     df_aT.rename(columns = {'T':'T', 'log_aT':'log_aT'}, inplace=True, 

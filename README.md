@@ -6,7 +6,6 @@ linear viscoelastic material models.
 > Note: This repository is currently in development!
 
 Documentation is available at (TBD):
-[pyvisco.readthedocs.io](https://pyvisco.readthedocs.io).
 
 
 ## Overview
@@ -23,7 +22,7 @@ An optional minimization routine is provided to reduce the number of Prony eleme
 ## Usage
 The easiest way of using this code is through an interactive Jupyter notebook that provides a graphical user interface to upload the experimental data, perform the curve fitting procedure, and download the obtained Prony series parameters. Click the link below to start the web application.
 
-TBD: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/{path}/pyvisco/HEAD?urlpath=voila%2Frender%2FLinViscoFit.ipynb)
+TBD: Include binder badge
 
 ## Install using pip
 
