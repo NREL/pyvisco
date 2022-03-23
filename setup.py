@@ -13,14 +13,14 @@ pyvisco is a collection of functions to identify Prony series parameters of
 linear viscoelastic materials from measurements in either the time 
 (relaxation tests) or frequency domain (DMTA).
 Documentation: https://pyvisco.readthedocs.io
-Source code: https://github.com/martin-springer/LinViscoFit
+Source code: https://github.com/NREL/pyvisco
 """
 
 DISTNAME = 'pyvisco'
 MAINTAINER = "Martin Springer"
-MAINTAINER_EMAIL = 'martinspringer.ms@gmail.com'
-LICENSE = 'GNU'
-URL = 'https://github.com/martin-springer/LinViscoFit'
+MAINTAINER_EMAIL = 'martin.springer@nrel.gov'
+LICENSE = 'BSD-3'
+URL = 'https://github.com/NREL/pyvisco'
 
 INSTALL_REQUIRES = [
     'jupyter',
