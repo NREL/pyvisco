@@ -5,6 +5,8 @@ try:
 except ImportError:
     raise RuntimeError('setuptools is required')
 
+import versioneer
+
 DESCRIPTION = ('pyvisco is a python library that supports Prony series' + 
                'identification for linear viscoelastic material models.')
 
@@ -60,6 +62,8 @@ PACKAGES = find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"])
 
 setup(
     name=DISTNAME,
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     use_scm_version=True,
     packages=PACKAGES,
     install_requires=INSTALL_REQUIRES,
