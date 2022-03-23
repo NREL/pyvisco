@@ -5,7 +5,7 @@ viscoelastic materials from measurements in either the time (relaxation tests)
 or frequency domain (DMTA).
 """
 
-__version__ = '0.9.0'
+__version__ = _version.get_versions()['version']
 
 from . import load
 from . import shift
@@ -15,4 +15,4 @@ from . import opt
 from . import verify
 from . import out
 from . import _version
-__version__ = _version.get_versions()['version']
+
