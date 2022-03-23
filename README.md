@@ -18,17 +18,16 @@ The easiest way of using pyvisco is through an interactive Jupyter notebook that
 
 TBD: Include binder/heroku badge
 
-Alternatively, the library can be installed as:
+Alternatively, the library can be installed as (PyPi installation coming soon...):
 1. Clone or download the pyvisco repository.
 2. Navigate to repository: `cd pyvisco`
 3. Install via pip: `pip install .`
-4. Alternate installation development mode: `pip install -e .`
 
-An API documentation is available at: (TBD)
+An API documentation is available at: readthedocs (TBD)
 Additionally, the verification subfolder contains example Jupyter notebooks on how to use the library.
 
 ## Verification
-The Python implementation was verified by comparing the obtained results with the curve fitting routine implemented in the commercial software package ANSYS APDL 2020 R1. Jupyter notebooks showcasing the comparision and supplementary files can be found in the verification subfolder.
+The Python implementation was verified by comparing the obtained Prony series parmaters with the curve fitting routine implemented in the commercial software package ANSYS APDL 2020 R1. Jupyter notebooks showcasing the comparision and supplementary files can be found in the verification subfolder.
 
 ## Citing
-If you are using pyvisco in your published work, please cite the DOI corresponding to the specific version that you are using. Pyvisco DOIs are listed at Zenodo.org (TBD) 
+If you are using pyvisco in your published work, please cite the DOI corresponding to the specific version that you are using. Pyvisco DOIs are listed at Zenodo.org (TBD).
