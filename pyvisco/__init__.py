@@ -14,3 +14,5 @@ from . import prony
 from . import opt
 from . import verify
 from . import out
+from . import _version
+__version__ = _version.get_versions()['version']
