@@ -16,7 +16,7 @@ An optional minimization routine is provided to reduce the number of Prony eleme
 ## Usage
 The easiest way of using pyvisco is through an interactive Jupyter notebook that provides a graphical user interface to upload the experimental data, perform the curve fitting procedure, and download the obtained Prony series parameters. Click the link below to start the web application.
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/NREL/pyvisco/HEAD?urlpath=voila%2Frender%2FLinViscoFit.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/NREL/pyvisco/HEAD?urlpath=voila%2Frender%2FLinViscoFit.ipynb)  
 TBD: Include Heroku badge
 
 
@@ -25,7 +25,7 @@ Alternatively, the library can be installed as (PyPi installation coming soon...
 2. Navigate to repository: `cd pyvisco`
 3. Install via pip: `pip install .`
 
-A full API documentation is available at: [readthedocs](https://pyvisco.readthedocs.io/). [![Documentation Status](https://readthedocs.org/projects/pyvisco/badge/?version=latest)](https://pyvisco.readthedocs.io/en/latest/?badge=latest)   
+A full API documentation is available at: [![Documentation Status](https://readthedocs.org/projects/pyvisco/badge/?version=latest)](https://pyvisco.readthedocs.io/en/latest/?badge=latest)   
 Additionally, the [verification subfolder](https://github.com/NREL/pyvisco/tree/main/verification) contains example Jupyter notebooks on how to use the library.
 
 ## Verification
