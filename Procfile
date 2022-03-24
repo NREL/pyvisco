@@ -1,1 +1,1 @@
-web: voila --port=$PORT --no-browser LinViscoFit.ipynb
+web: voila --port=$PORT --no-browser 
