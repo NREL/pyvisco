@@ -14,11 +14,10 @@ The mechanical response of linear viscoelastic materials is often described with
 An optional minimization routine is provided to reduce the number of Prony elements. This routine is helpful for Finite Element simulations where reducing the computational complexity of the linear viscoelastic material models can shorten the simulation time.
 
 ## Usage
-The easiest way of using pyvisco is through an interactive Jupyter notebook that provides a graphical user interface to upload the experimental data, perform the curve fitting procedure, and download the obtained Prony series parameters. Click the link below to start the web application.
+The easiest way of using pyvisco is through an interactive Jupyter notebook that provides a graphical user interface to upload the experimental data, perform the curve fitting procedure, and download the obtained Prony series parameters. Currently, the Jupyter notebook is rendered with voila and can be accessed either through binder or Heroku. Click one of the below links to start the web application.
 
-![Heroku](https://pyheroku-badge.herokuapp.com/?app=pyvisco)
-[![Heroku](https://pyheroku-badge.herokuapp.com/?app=pyvisco)](https://pyvisco.herokuapp.com/)  
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/NREL/pyvisco/HEAD?urlpath=voila%2Frender%2FLinViscoFit.ipynb)  
+[Heroku](https://pyvisco.herokuapp.com/)  
+[Binder](https://mybinder.org/v2/gh/NREL/pyvisco/HEAD?urlpath=voila%2Frender%2FLinViscoFit.ipynb)  
 
 
 
