@@ -29,7 +29,7 @@ A full API documentation is available at: [![Documentation Status](https://readt
 Additionally, the [verification subfolder](https://github.com/NREL/pyvisco/tree/main/verification) contains example Jupyter notebooks on how to use the library.
 
 ## Verification
-The Python implementation was verified by comparing the obtained Prony series parmaters with the curve fitting routine implemented in the commercial software package ANSYS APDL 2020 R1. Jupyter notebooks showcasing the comparision and supplementary files can be found in the verification subfolder.
+The Python implementation was verified by comparing the obtained Prony series parmaters with the curve fitting routine implemented in the commercial software package ANSYS APDL 2020 R1. Jupyter notebooks showcasing the comparision and supplementary files can be found in the [verification subfolder](https://github.com/NREL/pyvisco/tree/main/verification).
 
 ## Citing
 If you are using pyvisco in your published work, please cite the DOI corresponding to the specific version that you are using. Pyvisco DOIs are listed at Zenodo.org (TBD).
