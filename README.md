@@ -25,8 +25,8 @@ Alternatively, the library can be installed as (PyPi installation coming soon...
 2. Navigate to repository: `cd pyvisco`
 3. Install via pip: `pip install .`
 
-An API documentation is available at: readthedocs (TBD)
-Additionally, the verification subfolder contains example Jupyter notebooks on how to use the library.
+A full API documentation is available at: [readthedocs](https://pyvisco.readthedocs.io/). [![Documentation Status](https://readthedocs.org/projects/pyvisco/badge/?version=latest)](https://pyvisco.readthedocs.io/en/latest/?badge=latest)   
+Additionally, the [verification subfolder](https://github.com/NREL/pyvisco/tree/main/verification) contains example Jupyter notebooks on how to use the library.
 
 ## Verification
 The Python implementation was verified by comparing the obtained Prony series parmaters with the curve fitting routine implemented in the commercial software package ANSYS APDL 2020 R1. Jupyter notebooks showcasing the comparision and supplementary files can be found in the verification subfolder.
