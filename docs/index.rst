@@ -1,10 +1,9 @@
 Welcome to the documentation of pyvisco!
 ========================================
 
-pyvisco is a python library that supports Prony series identification for 
-linear viscoelastic material models.
+Pyvisco is a Python library that supports the identification of Prony series parameters in Generalized Maxwell models describing linear viscoelastic materials. 
 
-The source code for pyvisco is hosted on `github
+The source code for pyvisco is hosted on `GitHub
 <https://{path}}>`_.
 
 
