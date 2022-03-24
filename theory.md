@@ -40,7 +40,7 @@ An efficient way to determine the storage modulus, $E'(\omega)$, and the loss mo
 
 Measurements at very low frequencies (long time periods) can be very time-consuming and might be unfeasible for practical applications. On the other side of the spectrum, measurements at very high frequencies can be limited by the instrumentation or unintended heating of the sample during cyclic deformation. To avoid such situations, the [time-temperature superposition principle (TTSP)](https://en.wikipedia.org/wiki/Time%E2%80%93temperature_superposition) is applied for thermo-rheologically simple materials. For such materials, the viscoelastic response at one temperature is related to the viscoelastic response at another temperature by changing the time scale (or frequency). This way, the time scale for the materials characterization can be extended by conducting the same frequency measurements at different temperatures. Afterward, a reference temperature is selected, and the isothermal measurements are shifted on a logarithmic time (or frequency) scale to form a so–called master curve.
 
-![TTSP](https://raw.githubusercontent.com/martin-springer/LinViscoFit/56cdc52be38e245a86639b10b17fdca0d7a272e4/figures/TTSP_small.png)
+![TTSP](https://raw.githubusercontent.com/NREL/pyvisco/main/figures/TTSP_small.png)
 
 Time-temperature shift factors, $a_{\mathrm{T}}(\theta)$, are defined as the horizontal shift that must be applied to individual measurements at a constant temperature, $\theta_i$, to form the master curve at the reference temperature, $\theta_{\mathrm{ref}}$.
 
