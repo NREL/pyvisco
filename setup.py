@@ -7,7 +7,7 @@ except ImportError:
 
 import versioneer
 
-DESCRIPTION = ('pyvisco is a python library that supports Prony series' + 
+DESCRIPTION = ('Pyvisco is a Python library that supports Prony series ' + 
                'identification for linear viscoelastic material models.')
 
 LONG_DESCRIPTION = """
@@ -26,7 +26,7 @@ included to reduce the number of Prony elements. This routine is helpful in
 large Finite Element simulations where reducing the computational complexity of 
 the linear viscoelastic material models can shorten the simulation time.
 
-Documentation: https://pyvisco.readthedocs.io
+Documentation: https://pyvisco.readthedocs.io  
 Source code: https://github.com/NREL/pyvisco
 """
 
@@ -39,17 +39,19 @@ LICENSE = 'BSD-3'
 URL = 'https://github.com/NREL/pyvisco'
 
 INSTALL_REQUIRES = [
-    'jupyter',
-    'matplotlib',
-    'numpy',
-    'pandas',
-    'scipy',
-    'ipython',
-    'ipywidgets',
-    'ipympl',
-    'voila',
-    'xlrd',
-    'markdown',
+    'jupyter>=1.0.0',
+    'matplotlib>=3.5.1',
+    'numpy>=1.22.2',
+    'pandas>=1.4.1',
+    'scipy>=1.8.0',
+    'ipython>=8.0.1',
+    'ipywidgets>=7.6.5',
+    'ipympl>=0.8.8',
+    'voila>=0.3.1',
+    'xlrd>=2.0.1',
+    'Markdown>=3.3.6',
+    'jinja2==2.11.3',
+    'markupsafe==2.0.1',
 ]
 
 DOCS_REQUIRE = [
