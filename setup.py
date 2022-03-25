@@ -48,7 +48,7 @@ INSTALL_REQUIRES = [
     'ipywidgets>=7.6.5',
     'ipympl>=0.8.8',
     'voila>=0.3.1',
-    'xlrd>=2.0.1',
+    'xlrd>=1.2.0',
     'Markdown>=3.3.6',
     'jinja2==2.11.3',
     'markupsafe==2.0.1',
