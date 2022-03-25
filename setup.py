@@ -32,6 +32,7 @@ Source code: https://github.com/NREL/pyvisco
 
 DISTNAME = 'pyvisco'
 AUTHOR = "Martin Springer"
+AUTHOR_EMAIL = 'martin.springer@nrel.gov'
 MAINTAINER = "Martin Springer"
 MAINTAINER_EMAIL = 'martin.springer@nrel.gov'
 LICENSE = 'BSD-3'
@@ -101,6 +102,7 @@ setup(
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     author=AUTHOR,
+    author_email=MAINTAINER_EMAIL,
     maintainer=MAINTAINER,
     maintainer_email=MAINTAINER_EMAIL,
     license=LICENSE,
