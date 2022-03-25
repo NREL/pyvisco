@@ -21,10 +21,10 @@ The easiest way of using pyvisco is through an interactive Jupyter notebook that
 
 
 
-Alternatively, the library can be installed as (PyPi installation coming soon...):
-1. Clone or download the pyvisco repository.
-2. Navigate to repository: `cd pyvisco`
-3. Install via pip: `pip install .`
+Alternatively, pyvisco can be installed automatically into Python from PyPI using the command line:
+```
+pip install pyvisco
+```
 
 A full API documentation is available at: [![Documentation Status](https://readthedocs.org/projects/pyvisco/badge/?version=latest)](https://pyvisco.readthedocs.io/en/latest/?badge=latest)   
 Additionally, the [verification subfolder](https://github.com/NREL/pyvisco/tree/main/verification) contains example Jupyter notebooks on how to use the library.
@@ -32,5 +32,23 @@ Additionally, the [verification subfolder](https://github.com/NREL/pyvisco/tree/
 ## Verification
 The Python implementation was verified by comparing the obtained Prony series parmaters with the curve fitting routine implemented in the commercial software package ANSYS APDL 2020 R1. Jupyter notebooks showcasing the comparision and supplementary files can be found in the [verification subfolder](https://github.com/NREL/pyvisco/tree/main/verification).
 
-## Citing
-If you are using pyvisco in your published work, please cite the DOI corresponding to the specific version that you are using. Pyvisco DOIs are listed at Zenodo.org (TBD).
+## Citation
+If you are using pyvisco in your published work, please use the following along with the version number and the specific DOI coresponding to that version from Zenodo: [![DOI](https://zenodo.org/badge/473711699.svg)](https://zenodo.org/badge/latestdoi/473711699).
+
+
+### APA 
+```
+Springer, Martin (2022). PYVISCO: A Python library for identifying Prony series parameters of linear viscoelastic materials (Version {insert version}) [Computer software]. doi:{insert DOI}
+```
+
+### BibTeX
+```
+@software{Springer_pyvisco_2022,
+  author = {Springer, Martin},
+  doi = {insert DOI},
+  title = {{PYVISCO: A Python library for identifying Prony series parameters of linear viscoelastic materials}},
+  url = {https://github.com/NREL/pyvisco},
+  version = {insert version},
+  year = {2022}
+}
+```

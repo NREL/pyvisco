@@ -1,0 +1,13 @@
+{
+    "license": "BSD 3-clause", 
+    "title": "PYVISCO: A Python library for identifying Prony series parameters of linear viscoelastic materials", 
+    "upload_type": "software", 
+    "creators": [
+        {
+            "affiliation": "National Renewable Energy Laboratory, Golden, CO, USA",
+            "name": "Martin Springer",
+            "orcid": "0000-0001-6803-108X"
+        }
+    ], 
+    "access_right": "open"
+}
