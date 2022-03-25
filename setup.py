@@ -25,11 +25,13 @@ encapsulants and backsheets of PV modules. An optional minimization routine is
 included to reduce the number of Prony elements. This routine is helpful in 
 large Finite Element simulations where reducing the computational complexity of 
 the linear viscoelastic material models can shorten the simulation time.
+
 Documentation: https://pyvisco.readthedocs.io
 Source code: https://github.com/NREL/pyvisco
 """
 
 DISTNAME = 'pyvisco'
+AUTHOR = "Martin Springer"
 MAINTAINER = "Martin Springer"
 MAINTAINER_EMAIL = 'martin.springer@nrel.gov'
 LICENSE = 'BSD-3'
@@ -69,6 +71,19 @@ CLASSIFIERS = [
     'Topic :: Scientific/Engineering'
 ]
 
+KEYWORDS = [
+    'curve-fitting',
+    'material-modelling',
+    'viscoelasticity',
+    'prony'
+]
+
+PROJECT_URLS = {
+    "Documentation": "https://pyvisco.readthedocs.io/",
+    "Source Code": "https://github.com/NREL/pyvisco/",
+    "Web application" : "https://pyvisco.herokuapp.com/"
+}
+
 PACKAGES = find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"])
 
 setup(
@@ -77,6 +92,7 @@ setup(
     cmdclass=versioneer.get_cmdclass(),
     use_scm_version=True,
     packages=PACKAGES,
+    keywords=KEYWORDS,
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
     #tests_require=TESTS_REQUIRE,
@@ -84,10 +100,12 @@ setup(
     ext_modules=[],
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
+    author=AUTHOR,
     maintainer=MAINTAINER,
     maintainer_email=MAINTAINER_EMAIL,
     license=LICENSE,
     classifiers=CLASSIFIERS,
     url=URL,
+    project_urls=PROJECT_URLS,
     include_package_data=True,
 )
