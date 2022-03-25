@@ -112,4 +112,5 @@ setup(
     url=URL,
     project_urls=PROJECT_URLS,
     include_package_data=True,
+    python_requires='>=3.7',
 )
