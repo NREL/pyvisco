@@ -942,8 +942,11 @@ class Control(Widgets):
             display(self.w_loading)
             #try:
             #Fit shift factors if not present or overwrite
-            if not isinstance(self.df_aT, pd.DataFrame) or self.cb_aT.value:
+            #if not isinstance(self.df_aT, pd.DataFrame) or self.cb_aT.value:
+            if not self.cb_shift.value:
                 self.df_aT = master.get_aT(self.df_raw, self.RefT)
+            elif self.cb_aT.value:
+                    self.df_aT = master.get_aT(self.df_raw, self.RefT)
 
             #Assembly master curve
             self.df_master = master.get_curve(self.df_raw, self.df_aT, self.RefT)
