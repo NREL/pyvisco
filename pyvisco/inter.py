@@ -235,7 +235,7 @@ class Widgets():
             disabled=False,
             layout = widgets.Layout(height = _height, width = '250px'),
             style = {'description_width' : 'initial'})
-        self.ft_RefT.observe(self.set_RefT, 'value')
+        self.dd_RefT.observe(self.set_RefT, 'value')
 
         #Layout
         self.w_RefT = widgets.HBox([self.ft_RefT])
