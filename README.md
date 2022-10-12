@@ -2,8 +2,6 @@
 
 Pyvisco is a Python library that supports the identification of Prony series parameters for Generalized Maxwell models describing linear viscoelastic materials. 
 
-> Note: This repository is under development!
-
 ## Overview
 The mechanical response of linear viscoelastic materials is often described with Generalized Maxwell models. The necessary material model parameters are typically identified by fitting a Prony series to the experimental measurement data in either the frequency-domain (via Dynamic Mechanical Thermal Analysis) or time-domain (via relaxation measurements). Pyvisco performs the necessary data processing of the experimental measurements, mathematical operations, and curve-fitting routines to identify the Prony series parameters. The experimental data can be provided as raw measurement sets at different temperatures or as pre-processed master curves.
 
