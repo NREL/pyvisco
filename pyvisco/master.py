@@ -353,14 +353,14 @@ def plot(df_master, units):
     if df_master.domain == 'freq':
         fig, ax1 = plt.subplots()
         df_master.plot(x='f', 
-            y=[stor, loss], ax=ax1, logx=True)
+            y=[stor, loss], ax=ax1, logx=True, logy=True)
         ax1.set_xlabel('Frequency ({})'.format(units['f']))
         ax1.set_ylabel('Storage and loss modulus ({})'.format(units[stor])) 
         fig.show()
         return fig
     elif df_master.domain == 'time':
         fig, ax1 = plt.subplots()
-        df_master.plot(x='f', y=[relax], ax=ax1, logx=True)
+        df_master.plot(x='f', y=[relax], ax=ax1, logx=True, logy=True)
         ax1.set_xlabel('Time ({})'.format(units['t']))
         ax1.set_ylabel('Relaxation modulus ({})'.format(units[stor]))
         fig.show()
@@ -429,24 +429,24 @@ def plot_shift(df_raw, df_master, units):
         lax1 = []
         lax2 = []
         for i, (group, df_set) in enumerate(gb_master):
-            line1, = ax1.semilogx(df_set["f"], df_set[stor], 
+            line1, = ax1.loglog(df_set["f"], df_set[stor], 
                 ls='', marker='.', color=colors1[int(group)])
-            line2, = ax2.semilogx(df_set["f"], df_set[loss], 
+            line2, = ax2.loglog(df_set["f"], df_set[loss], 
                 ls='', marker='.', color=colors2[int(group)])
             lax1.append(line1)
             lax2.append(line2)
         for i, (group, df_set) in enumerate(gb_raw):
             if i in np.linspace(0, gb_raw.ngroups-1, num=5, dtype=int):
-                ax1.semilogx(df_set["f_set"], df_set[stor], 
+                ax1.loglog(df_set["f_set"], df_set[stor], 
                     ls='', marker='.', color=colors1[int(group)], 
                     label = '$T$={}\N{DEGREE SIGN}C'.format(df_set['T_round'].iloc[0]))
-                ax2.semilogx(df_set["f_set"], df_set[loss], 
+                ax2.loglog(df_set["f_set"], df_set[loss], 
                     ls='', marker='.', color=colors2[int(group)], 
                     label = '$T$={}\N{DEGREE SIGN}C'.format(df_set['T_round'].iloc[0]))
             else:
-                ax1.semilogx(df_set["f_set"], df_set[stor], 
+                ax1.loglog(df_set["f_set"], df_set[stor], 
                 ls='', marker='.', color=colors1[int(group)])
-                ax2.semilogx(df_set["f_set"], df_set[loss], 
+                ax2.loglog(df_set["f_set"], df_set[loss], 
                 ls='', marker='.', color=colors2[int(group)])
         ax = (ax1, lax1, ax2, lax2)
 
@@ -470,16 +470,16 @@ def plot_shift(df_raw, df_master, units):
 
         lax1 = []
         for i, (group, df_set) in enumerate(gb_master):
-            line1, = ax1.semilogx(df_set["t"], df_set[relax], 
+            line1, = ax1.loglog(df_set["t"], df_set[relax], 
                 ls='', marker='.', color=colors1[int(group)])
             lax1.append(line1)
         for i, (group, df_set) in enumerate(gb_raw):
             if i in np.linspace(0, gb_raw.ngroups-1, num=5, dtype=int):
-                ax1.semilogx(df_set["t_set"], df_set[relax], 
+                ax1.loglog(df_set["t_set"], df_set[relax], 
                 ls='', marker='.', color=colors1[int(group)], 
                 label = '$T$={}\N{DEGREE SIGN}C'.format(df_set['T_round'].iloc[0]))
             else:
-                ax1.semilogx(df_set["t_set"], df_set[relax], 
+                ax1.loglog(df_set["t_set"], df_set[relax], 
                 ls='', marker='.', color=colors1[int(group)])
         ax = (ax1, lax1)
 
@@ -620,13 +620,13 @@ def plot_smooth(df_master, units):
     if df_master.domain == 'freq':
         fig, ax = plt.subplots()
         df_master.plot(x='f', y=[stor], label=["{}'(raw)".format(modul)], 
-            ax=ax, logx=True, color=['C0'], marker='o', ls='', alpha=0.5)
+            ax=ax, logx=True, logy=True, color=['C0'], marker='o', ls='', alpha=0.5)
         df_master.plot(x='f', y=[stor_filt], label=["{}'(filt)".format(modul)], 
-            ax=ax, logx=True, color=['C0'])
+            ax=ax, logx=True, logy=True, color=['C0'])
         df_master.plot(x='f', y=[loss], label=["{}''(raw)".format(modul)], 
-            ax=ax, logx=True, color=['C1'], marker='o', ls='', alpha=0.5)
+            ax=ax, logx=True, logy=True, color=['C1'], marker='o', ls='', alpha=0.5)
         df_master.plot(x='f', y=[loss_filt], label=["{}''(filt)".format(modul)], 
-            ax=ax, logx=True, color=['C1'])
+            ax=ax, logx=True, logy=True, color=['C1'])
         ax.set_xlabel('Frequency ({})'.format(units['f']))
         ax.set_ylabel('Storage and loss modulus ({})'.format(units[stor])) 
         ax.legend()
@@ -635,9 +635,9 @@ def plot_smooth(df_master, units):
     elif df_master.domain == 'time':
         fig, ax1 = plt.subplots()
         df_master.plot(x='t', y=[relax], label = [relax], 
-            ax=ax1, logx=True, ls='', marker='o', color=['gray'])
+            ax=ax1, logx=True, logy=True, ls='', marker='o', color=['gray'])
         df_master.plot(x='t', y=[relax_filt], label=['filter'], 
-            ax=ax1, logx=True, color=['r'])
+            ax=ax1, logx=True, logy=True, color=['r'])
         ax1.set_xlabel('Time ({})'.format(units['t']))
         ax1.set_ylabel('Relaxation modulus ({})'.format(units[relax])) 
         ax1.legend()

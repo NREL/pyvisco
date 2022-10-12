@@ -860,9 +860,9 @@ def plot_fit(df_master, df_GMaxw, units):
     if df_master.domain == 'freq':
         fig, ax1 = plt.subplots()
         df_master.plot(x='f', y=[stor, loss], 
-            ax=ax1, logx=True, color=['C0', 'C1'], alpha=0.5, ls='', marker='o', markersize=3)
+            ax=ax1, logx=True, logy=True, color=['C0', 'C1'], alpha=0.5, ls='', marker='o', markersize=3)
         df_GMaxw.plot(x='f', y=[stor, loss], 
-            ax=ax1, logx=True, ls='-', lw=2, color=['C0', 'C1'])
+            ax=ax1, logx=True, logy=True, ls='-', lw=2, color=['C0', 'C1'])
         ax1.set_xlabel('Frequency ({})'.format(units['f']))
         ax1.set_ylabel('Storage and loss modulus ({})'.format(units[stor])) 
         ax1.legend()
