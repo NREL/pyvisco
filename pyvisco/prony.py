@@ -358,9 +358,9 @@ def fit_time(df_dis, df_master, opt=False):
         alpha_i = res.x[0:int(res.x.shape[0]/2)]
         df_dis['tau_i'] = res.x[int(res.x.shape[0]/2):]
      
-    #Ensure that Sum(alpha_i) < 1 (otherwise can lead to numerical difficulties in FEM)
-    if alpha_i.sum() >= 1:
-        df_dis['alpha_i'] = 0.999/alpha_i.sum()*alpha_i #normalize to 0.999
+    #Ensure that Sum(alpha_i) <= 1
+    if alpha_i.sum() > 1:
+        df_dis['alpha_i'] = 1/alpha_i.sum()*alpha_i #normalize to 1
     else:
         df_dis['alpha_i'] = alpha_i
 
@@ -503,9 +503,9 @@ def fit_freq(df_dis, df_master=None, opt=False):
             _msg = 'Prony series N = {:02d}: Convergence criterion not reached!'
             print(_msg.format(alpha_i.shape[0]))
 
-    #Ensure that Sum(alpha_i) < 1 (otherwise can lead to numerical difficulties in FEM)
+    #Ensure that Sum(alpha_i) <= 1
     if alpha_i.sum() >= 1:
-        df_dis['alpha_i'] = 0.999/alpha_i.sum()*alpha_i #normalize to 0.999
+        df_dis['alpha_i'] = 1/alpha_i.sum()*alpha_i #normalize to 1
     else:
         df_dis['alpha_i'] = alpha_i
 
