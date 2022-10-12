@@ -748,7 +748,7 @@ def plot_GMaxw_temp(df_GMaxw_temp, units):
         df.plot(y=relax, x='T', ls='--', ax=ax1, logy=True, c='C{}'.format(i), label='') 
     ax1.set_xlabel('Temperature ({})'.format(units['T']))
     ax1.set_ylabel('Relaxation, storage and \n loss modulus ({})'.format(units[stor]))
-    ax1.set_ylim(min(df_GMaxw[stor].min(), df_GMaxw[loss].min()), )
+    ax1.set_ylim(min(df[stor].min(), df[loss].min()), )
     ax1.legend()
     fig.show()
     return fig
