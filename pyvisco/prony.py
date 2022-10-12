@@ -80,7 +80,7 @@ def discretize(df_master, window='round', nprony=0):
         val_0 = _tau.iloc[0]
     decades = exp_inf - exp_0
     
-    #Space evenly on a log scale in time domain
+    #Space evenly on a log-scale in time domain
     if nprony == 0:
         nprony = exp_inf - exp_0 + 1 #One prony term per decade 
     if window == 'round':
@@ -161,9 +161,9 @@ def plot_dis(df_master, df_dis, units):
     if df_master.domain == 'freq':
         fig, ax1 = plt.subplots()
         df_master.plot(x='f', y=[stor, loss], 
-            ax=ax1, logx=True, color=['C0', 'C1'], alpha=0.5)
+            ax=ax1, logx=True, logy=True, color=['C0', 'C1'], alpha=0.5)
         df_dis.plot(x='f', y=[stor, loss], label=['tau_i', 'tau_i'], ax=ax1, 
-            logx=True, ls='', marker='o', color=['C0', 'C1'])
+            logx=True, logy=True, ls='', marker='o', color=['C0', 'C1'])
         ax1.set_xlabel('Frequency ({})'.format(units['f']))
         ax1.set_ylabel('Storage and loss modulus ({})'.format(units[stor]))
         ax1.legend()
@@ -171,9 +171,10 @@ def plot_dis(df_master, df_dis, units):
         return fig
     elif df_master.domain == 'time':
         fig, ax1 = plt.subplots()
-        df_master.plot(x='t', y=[relax], ax=ax1, logx=True, color=['k'])
+        df_master.plot(x='t', y=[relax], 
+            ax=ax1, logx=True, logy=True, color=['k'])
         df_dis.plot(x='t', y=[relax], label = ['tau_i'], 
-            ax=ax1, logx=True, ls='', marker='o', color=['red'])
+            ax=ax1, logx=True, logy=True, ls='', marker='o', color=['red'])
         ax1.set_xlabel('Time ({})'.format(units['t']))
         ax1.set_ylabel('Relaxation modulus ({})'.format(units[relax]))
         ax1.legend()
@@ -702,9 +703,12 @@ def plot_GMaxw(df_GMaxw, units):
     relax = '{}_relax'.format(modul)
 
     fig1, ax1 = plt.subplots() 
-    df_GMaxw.plot(x='f', y=[stor], ax=ax1, logx=True, ls='-', lw=2, color=['C0'])
-    df_GMaxw.plot(x='f', y=[loss], ax=ax1, logx=True, ls=':', lw=2, color=['C1'])
-    df_GMaxw.plot(x='f', y=[relax], ax=ax1, logx=True, ls='--', lw=2, color=['C2'])
+    df_GMaxw.plot(x='f', y=[stor],  
+            ax=ax1, logx=True, logy=True, ls='-', lw=2, color=['C0'])
+    df_GMaxw.plot(x='f', y=[loss],  
+            ax=ax1, logx=True, logy=True, ls=':', lw=2, color=['C1'])
+    df_GMaxw.plot(x='f', y=[relax], 
+            ax=ax1, logx=True, logy=True, ls='--', lw=2, color=['C2'])
     ax1.set_xlabel('Frequency ({})'.format(units['f']))
     ax1.set_ylabel('Relaxation, storage and \n loss modulus ({})'.format(units[stor]))
     fig1.show()
@@ -866,10 +870,10 @@ def plot_fit(df_master, df_GMaxw, units):
         return fig
     elif df_master.domain == 'time':
         fig, ax1 = plt.subplots()
-        df_master.plot(x='t', y=[relax], 
-            ax=ax1, logx=True, color=['gray'], ls='', marker='o', markersize=3)
-        df_GMaxw.plot(x='t', y=[relax], 
-            label=['fit'], ax=ax1, logx=True, ls='-', lw=2, color=['r'])
+        df_master.plot(x='t', y=[relax], ax=ax1, logx=True, logy=True, 
+            color=['gray'], ls='', marker='o', markersize=3)
+        df_GMaxw.plot(x='t', y=[relax], label=['fit'], ax=ax1, 
+            logx=True, logy=True, ls='-', lw=2, color=['r'])
         ax1.set_xlabel('Time ({})'.format(units['t']))
         ax1.set_ylabel('Relaxation modulus ({})'.format(units[relax])) 
         ax1.legend()
