@@ -711,6 +711,7 @@ def plot_GMaxw(df_GMaxw, units):
             ax=ax1, logx=True, logy=True, ls='--', lw=2, color=['C2'])
     ax1.set_xlabel('Frequency ({})'.format(units['f']))
     ax1.set_ylabel('Relaxation, storage and \n loss modulus ({})'.format(units[stor]))
+    ax1.set_ylim(min(df_GMaxw[stor].min(), df_GMaxw[loss].min()), )
     fig1.show()
     return fig1 
     
@@ -741,12 +742,13 @@ def plot_GMaxw_temp(df_GMaxw_temp, units):
 
     fig, ax1 = plt.subplots()
     for i, (f, df) in enumerate(df_GMaxw_temp.groupby('f')):
-        df.plot(y=stor, x='T', ls='-', ax=ax1, label='f = {:.0e} Hz'.format(f), 
+        df.plot(y=stor, x='T', ls='-', ax=ax1, logy=True, label='f = {:.0e} Hz'.format(f), 
             c='C{}'.format(i))
-        df.plot(y=loss, x='T', ls=':', ax=ax1, label='', c='C{}'.format(i))
-        df.plot(y=relax, x='T', ls='--', ax=ax1, c='C{}'.format(i), label='') 
+        df.plot(y=loss, x='T', ls=':', ax=ax1, logy=True, label='', c='C{}'.format(i))
+        df.plot(y=relax, x='T', ls='--', ax=ax1, logy=True, c='C{}'.format(i), label='') 
     ax1.set_xlabel('Temperature ({})'.format(units['T']))
     ax1.set_ylabel('Relaxation, storage and \n loss modulus ({})'.format(units[stor]))
+    ax1.set_ylim(min(df_GMaxw[stor].min(), df_GMaxw[loss].min()), )
     ax1.legend()
     fig.show()
     return fig
