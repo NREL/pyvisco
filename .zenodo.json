@@ -1,5 +1,5 @@
 {
-    "license": "BSD 3-clause", 
+    "license": "BSD-3-Clause", 
     "title": "PYVISCO: A Python library for identifying Prony series parameters of linear viscoelastic materials", 
     "upload_type": "software", 
     "creators": [
