@@ -67,7 +67,10 @@ def pwr_x(y, a, b, e):
     -----
     Inverse Power Law relation: :math:`x=\left(\frac{y-e}{a}\right)^{\frac{1}{b}}`
     """
-    return ((y-e)/a)**(1/b)
+    base = (y-e)/a
+    power = 1/b
+    x = np.sign(a) * (np.abs(base)) ** (power)
+    return x
 
 
 def fit_pwr(xdata, ydata):
