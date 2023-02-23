@@ -5,7 +5,7 @@ channels:
 dependencies:
   - matplotlib
   - numpy=1.21.5
-  - pandas=1.5.2
+  - pandas
   - scipy=1.9.3
   - ipython
   - ipywidgets=7.6.5
