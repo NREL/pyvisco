@@ -1,6 +1,7 @@
 name: env-pyvisco
 channels:
   - default
+  - conda-forge
 dependencies:
   - python
   - matplotlib
