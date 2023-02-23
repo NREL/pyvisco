@@ -196,16 +196,21 @@ def fit_at_pwr(df_raw, gb_ref, gb_shift):
         
     if top_ydata.min() < bot_ydata.max():
         #overlap range
-        ymin = top_ydata.min()
-        ymax = bot_ydata.max()
+        #ymin = top_ydata.min()
+        #ymax = bot_ydata.max()
+        ymin = np.quantile(top_ydata, 0.5)
+        ymax = np.quantile(bot_ydata, 0.5)
     else:
         #gap range
-        ymin = bot_ydata.max()
-        ymax = top_ydata.min()   
+        #ymin = bot_ydata.max()
+        #ymax = top_ydata.min()   
+        ymin = np.quantile(bot_ydata, 0.5)
+        ymax = np.quantile(top_ydata, 0.5)
         
     #Define three points along inter/extrapolation range
-    ymid = (ymin+ymax)/2
-    y = np.array([ymin, ymid, ymax])
+    #ymid = (ymin+ymax)/2
+    #y = np.array([ymin, ymid, ymax])
+    y = np.linspace(ymin, ymax, 3)
 
     #Compute average shift factor for the three points
     x_top = pwr_x(y, *top_popt)
