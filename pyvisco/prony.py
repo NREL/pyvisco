@@ -159,14 +159,21 @@ def plot_dis(df_master, df_dis, units):
     relax = '{}_relax'.format(modul)
 
     if df_master.domain == 'freq':
-        fig, ax1 = plt.subplots()
-        df_master.plot(x='f', y=[stor, loss], 
-            ax=ax1, logx=True, logy=True, color=['C0', 'C1'], alpha=0.5)
-        df_dis.plot(x='f', y=[stor, loss], label=['tau_i', 'tau_i'], ax=ax1, 
-            logx=True, logy=True, ls='', marker='o', color=['C0', 'C1'])
-        ax1.set_xlabel('Frequency ({})'.format(units['f']))
-        ax1.set_ylabel('Storage and loss modulus ({})'.format(units[stor]))
+        fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
+        df_master.plot(x='f', y=[stor], 
+            ax=ax1, logx=True, logy=True, color=['C0'], alpha=0.5)
+        df_master.plot(x='f', y=[loss], 
+            ax=ax2, logx=True, logy=True, color=['C1'], alpha=0.5)
+        df_dis.plot(x='f', y=[stor], label=['tau_i'], ax=ax1, 
+            logx=True, logy=True, ls='', marker='o', color=['C0'])
+        df_dis.plot(x='f', y=[loss], label=['tau_i'], ax=ax2, 
+            logx=True, logy=True, ls='', marker='o', color=['C1'])
+        ax1.set_xlabel('Frequency (Hz)')
+        ax1.set_ylabel('Storage modulus ({})'.format(units[stor]))
+        ax2.set_xlabel('Frequency (Hz)')
+        ax2.set_ylabel('Loss modulus ({})'.format(units[stor])) 
         ax1.legend()
+        ax2.legend()
         fig.show()
         return fig
     elif df_master.domain == 'time':
@@ -291,7 +298,8 @@ def fit_time(df_dis, df_master, opt=False):
     Fit Prony series parameter in time domain.
 
     A least-squares minimization is performed using the L-BFGS-B method from 
-    the scipy package. The implementation is similar to the optimization problem described by [1] for a homogenous distribution of discrete times. 
+    the scipy package. The implementation is similar to the optimization problem 
+    described by [1] for a homogenous distribution of discrete times. 
 
     Parameters
     ----------
@@ -482,7 +490,8 @@ def fit_freq(df_dis, df_master=None, opt=False):
         #Define bounds
         tau_max = 1/(2*np.pi*df_dis.f_min)
         tau_min = 1/(2*np.pi*df_dis.f_max)
-        bnd_t = ((tau_min, tau_max),)*alpha_i.shape[0]
+        #bnd_t = ((tau_min, tau_max),)*alpha_i.shape[0]
+        bnd_t = tuple(zip(df_dis['tau_i'], df_dis['tau_i'])) #TODO: fix optimization
         bnd_a = ((0,1),)*alpha_i.shape[0]
         bnd = bnd_a + bnd_t
 
@@ -702,18 +711,21 @@ def plot_GMaxw(df_GMaxw, units):
     loss = '{}_loss'.format(modul)
     relax = '{}_relax'.format(modul)
 
-    fig1, ax1 = plt.subplots() 
+    fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
     df_GMaxw.plot(x='f', y=[stor],  
             ax=ax1, logx=True, logy=True, ls='-', lw=2, color=['C0'])
     df_GMaxw.plot(x='f', y=[loss],  
-            ax=ax1, logx=True, logy=True, ls=':', lw=2, color=['C1'])
+            ax=ax2, logx=True, logy=True, ls=':', lw=2, color=['C1'])
     df_GMaxw.plot(x='f', y=[relax], 
             ax=ax1, logx=True, logy=True, ls='--', lw=2, color=['C2'])
-    ax1.set_xlabel('Frequency ({})'.format(units['f']))
-    ax1.set_ylabel('Relaxation, storage and \n loss modulus ({})'.format(units[stor]))
-    ax1.set_ylim(min(df_GMaxw[stor].min(), df_GMaxw[loss].min()), )
-    fig1.show()
-    return fig1 
+    ax1.set_xlabel('Frequency (Hz)')
+    ax1.set_ylabel('Relaxation and \nstorage modulus ({})'.format(units[stor]))
+    ax2.set_xlabel('Frequency (Hz)')
+    ax2.set_ylabel('Loss modulus ({})'.format(units[stor])) 
+    ax1.legend()
+    ax2.legend()
+    fig.show()
+    return fig
     
 
 def plot_GMaxw_temp(df_GMaxw_temp, units):
@@ -740,16 +752,18 @@ def plot_GMaxw_temp(df_GMaxw_temp, units):
     loss = '{}_loss'.format(modul)
     relax = '{}_relax'.format(modul)
 
-    fig, ax1 = plt.subplots()
+    fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
     for i, (f, df) in enumerate(df_GMaxw_temp.groupby('f')):
         df.plot(y=stor, x='T', ls='-', ax=ax1, logy=True, label='f = {:.0e} Hz'.format(f), 
             c='C{}'.format(i))
-        df.plot(y=loss, x='T', ls=':', ax=ax1, logy=True, label='', c='C{}'.format(i))
+        df.plot(y=loss, x='T', ls=':', ax=ax2, logy=True, label='f = {:.0e} Hz'.format(f), c='C{}'.format(i))
         df.plot(y=relax, x='T', ls='--', ax=ax1, logy=True, c='C{}'.format(i), label='') 
     ax1.set_xlabel('Temperature ({})'.format(units['T']))
-    ax1.set_ylabel('Relaxation, storage and \n loss modulus ({})'.format(units[stor]))
-    ax1.set_ylim(min(df[stor].min(), df[loss].min()), )
+    ax1.set_ylabel('Relaxation and \nstorage modulus ({})'.format(units[stor]))
+    ax2.set_xlabel('Temperature ({})'.format(units['T']))
+    ax2.set_ylabel('Loss modulus ({})'.format(units[stor])) 
     ax1.legend()
+    ax2.legend()
     fig.show()
     return fig
 
@@ -860,13 +874,21 @@ def plot_fit(df_master, df_GMaxw, units):
     relax = '{}_relax'.format(modul)
 
     if df_master.domain == 'freq':
-        fig, ax1 = plt.subplots()
-        df_master.plot(x='f', y=[stor, loss], 
-            ax=ax1, logx=True, logy=True, color=['C0', 'C1'], alpha=0.5, ls='', marker='o', markersize=3)
-        df_GMaxw.plot(x='f', y=[stor, loss], 
-            ax=ax1, logx=True, logy=True, ls='-', lw=2, color=['C0', 'C1'])
-        ax1.set_xlabel('Frequency ({})'.format(units['f']))
-        ax1.set_ylabel('Storage and loss modulus ({})'.format(units[stor])) 
+        fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
+        ax1.set_xlabel('Frequency (Hz)')
+        ax1.set_ylabel('Storage modulus ({})'.format(units[stor]))
+        ax2.set_xlabel('Frequency (Hz)')
+        ax2.set_ylabel('Loss modulus ({})'.format(units[stor])) 
+        df_master.plot(x='f', y=[stor], 
+            ax=ax1, logx=True, logy=True, color=['C0'], 
+            alpha=0.5, ls='', marker='o', markersize=3)
+        df_master.plot(x='f', y=[loss], 
+            ax=ax2, logx=True, logy=True, color=['C1'], 
+            alpha=0.5, ls='', marker='o', markersize=3)
+        df_GMaxw.plot(x='f', y=[stor], 
+            ax=ax1, logx=True, logy=True, ls='-', lw=2, color=['C0'])
+        df_GMaxw.plot(x='f', y=[loss], 
+            ax=ax2, logx=True, logy=True, ls='-', lw=2, color=['C1'])
         ax1.legend()
         fig.show()
         return fig

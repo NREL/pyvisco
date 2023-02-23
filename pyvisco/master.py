@@ -359,11 +359,13 @@ def plot(df_master, units):
     relax = '{}_relax'.format(modul)
 
     if df_master.domain == 'freq':
-        fig, ax1 = plt.subplots()
-        df_master.plot(x='f', 
-            y=[stor, loss], ax=ax1, logx=True, logy=True)
-        ax1.set_xlabel('Frequency ({})'.format(units['f']))
-        ax1.set_ylabel('Storage and loss modulus ({})'.format(units[stor])) 
+        fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
+        ax1.set_xlabel('Frequency (Hz)')
+        ax1.set_ylabel('Storage modulus ({})'.format(units[stor]))
+        ax2.set_xlabel('Frequency (Hz)')
+        ax2.set_ylabel('Loss modulus ({})'.format(units[stor])) 
+        df_master.plot(x='f', y=[stor], ax=ax1, logx=True, logy=True)
+        df_master.plot(x='f', y=[loss], ax=ax2, logx=True, logy=True)
         fig.show()
         return fig
     elif df_master.domain == 'time':
@@ -626,18 +628,21 @@ def plot_smooth(df_master, units):
     relax_filt = '{}_relax_filt'.format(modul)
 
     if df_master.domain == 'freq':
-        fig, ax = plt.subplots()
+        fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
+        ax1.set_xlabel('Frequency (Hz)')
+        ax1.set_ylabel('Storage modulus ({})'.format(units[stor]))
+        ax2.set_xlabel('Frequency (Hz)')
+        ax2.set_ylabel('Loss modulus ({})'.format(units[stor])) 
         df_master.plot(x='f', y=[stor], label=["{}'(raw)".format(modul)], 
-            ax=ax, logx=True, logy=True, color=['C0'], marker='o', ls='', alpha=0.5)
+            ax=ax1, logx=True, logy=True, color=['C0'], marker='o', ls='', alpha=0.5)
         df_master.plot(x='f', y=[stor_filt], label=["{}'(filt)".format(modul)], 
-            ax=ax, logx=True, logy=True, color=['C0'])
+            ax=ax1, logx=True, logy=True, color=['C0'])
         df_master.plot(x='f', y=[loss], label=["{}''(raw)".format(modul)], 
-            ax=ax, logx=True, logy=True, color=['C1'], marker='o', ls='', alpha=0.5)
+            ax=ax2, logx=True, logy=True, color=['C1'], marker='o', ls='', alpha=0.5)
         df_master.plot(x='f', y=[loss_filt], label=["{}''(filt)".format(modul)], 
-            ax=ax, logx=True, logy=True, color=['C1'])
-        ax.set_xlabel('Frequency ({})'.format(units['f']))
-        ax.set_ylabel('Storage and loss modulus ({})'.format(units[stor])) 
-        ax.legend()
+            ax=ax2, logx=True, logy=True, color=['C1'])
+        ax1.legend()
+        ax2.legend()
         fig.show()
         return fig
     elif df_master.domain == 'time':

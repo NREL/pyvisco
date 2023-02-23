@@ -1088,7 +1088,9 @@ class Control(Widgets):
 
                 #Perform curve fitting
                 if self.rb_domain.value == 'freq':
-                    self.prony = prony.fit_freq(self.df_dis)
+                    #self.prony = prony.fit_freq(self.df_dis)
+                    self.prony = prony.fit_freq(self.df_dis, 
+                                                self.df_master, opt=True) #TODO: combine fit_freq
                 elif self.rb_domain.value == 'time':
                     self.prony = prony.fit_time(self.df_dis, self.df_master)
 
