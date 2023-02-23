@@ -1087,15 +1087,8 @@ class Control(Widgets):
                 display(self.w_loading)
 
                 #Perform curve fitting
-                if self.rb_domain.value == 'freq':
-                    #self.prony = prony.fit_freq(self.df_dis)
-                    self.prony = prony.fit_freq(self.df_dis, 
-                                                self.df_master, opt=True) #TODO: combine fit_freq
-                elif self.rb_domain.value == 'time':
-                    self.prony = prony.fit_time(self.df_dis, self.df_master)
-
-                #Calculate Generalized Maxwell model
-                self.df_GMaxw = prony.calc_GMaxw(**self.prony)
+                self.prony, self.df_GMaxw = prony.fit(self.df_dis, self.df_master, 
+                                                      opt=False)
             
                 #Plot figure
                 clear_output()

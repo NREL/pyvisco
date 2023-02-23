@@ -369,7 +369,7 @@ def plot(df_master, units):
         fig.show()
         return fig
     elif df_master.domain == 'time':
-        fig, ax1 = plt.subplots()
+        fig, ax1 = plt.subplots(figsize=(4,0.75*4))
         df_master.plot(x='f', y=[relax], ax=ax1, logx=True, logy=True)
         ax1.set_xlabel('Time ({})'.format(units['t']))
         ax1.set_ylabel('Relaxation modulus ({})'.format(units[stor]))
@@ -470,7 +470,7 @@ def plot_shift(df_raw, df_master, units):
         return fig, ax
 
     elif df_master.domain == 'time':
-        fig, ax1 = plt.subplots()
+        fig, ax1 = plt.subplots(figsize=(4,0.75*4))
         ax1.set_xlabel('Time (s)')
         ax1.set_ylabel('Relaxation modulus ({})'.format(units[relax])) 
         
@@ -629,24 +629,24 @@ def plot_smooth(df_master, units):
 
     if df_master.domain == 'freq':
         fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
+        df_master.plot(x='f', y=[stor], label=["{}'(raw)".format(modul)], 
+            ax=ax1, logx=True, logy=True, color=['C0'], marker='o', ls='', alpha=0.5)
+        df_master.plot(x='f', y=[stor_filt], label=["{}'(filter)".format(modul)], 
+            ax=ax1, logx=True, logy=True, color=['C0'])
+        df_master.plot(x='f', y=[loss], label=["{}''(raw)".format(modul)], 
+            ax=ax2, logx=True, logy=True, color=['C1'], marker='o', ls='', alpha=0.5)
+        df_master.plot(x='f', y=[loss_filt], label=["{}''(filter)".format(modul)], 
+            ax=ax2, logx=True, logy=True, color=['C1'])
         ax1.set_xlabel('Frequency (Hz)')
         ax1.set_ylabel('Storage modulus ({})'.format(units[stor]))
         ax2.set_xlabel('Frequency (Hz)')
         ax2.set_ylabel('Loss modulus ({})'.format(units[stor])) 
-        df_master.plot(x='f', y=[stor], label=["{}'(raw)".format(modul)], 
-            ax=ax1, logx=True, logy=True, color=['C0'], marker='o', ls='', alpha=0.5)
-        df_master.plot(x='f', y=[stor_filt], label=["{}'(filt)".format(modul)], 
-            ax=ax1, logx=True, logy=True, color=['C0'])
-        df_master.plot(x='f', y=[loss], label=["{}''(raw)".format(modul)], 
-            ax=ax2, logx=True, logy=True, color=['C1'], marker='o', ls='', alpha=0.5)
-        df_master.plot(x='f', y=[loss_filt], label=["{}''(filt)".format(modul)], 
-            ax=ax2, logx=True, logy=True, color=['C1'])
         ax1.legend()
         ax2.legend()
         fig.show()
         return fig
     elif df_master.domain == 'time':
-        fig, ax1 = plt.subplots()
+        fig, ax1 = plt.subplots(figsize=(4,0.75*4))
         df_master.plot(x='t', y=[relax], label = [relax], 
             ax=ax1, logx=True, logy=True, ls='', marker='o', color=['gray'])
         df_master.plot(x='t', y=[relax_filt], label=['filter'], 

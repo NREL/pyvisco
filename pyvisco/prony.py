@@ -160,9 +160,9 @@ def plot_dis(df_master, df_dis, units):
 
     if df_master.domain == 'freq':
         fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
-        df_master.plot(x='f', y=[stor], 
+        df_master.plot(x='f', y=[stor], label=["{}'(filter)".format(modul)],
             ax=ax1, logx=True, logy=True, color=['C0'], alpha=0.5)
-        df_master.plot(x='f', y=[loss], 
+        df_master.plot(x='f', y=[loss], label=["{}''(filter)".format(modul)],
             ax=ax2, logx=True, logy=True, color=['C1'], alpha=0.5)
         df_dis.plot(x='f', y=[stor], label=['tau_i'], ax=ax1, 
             logx=True, logy=True, ls='', marker='o', color=['C0'])
@@ -177,7 +177,7 @@ def plot_dis(df_master, df_dis, units):
         fig.show()
         return fig
     elif df_master.domain == 'time':
-        fig, ax1 = plt.subplots()
+        fig, ax1 = plt.subplots(figsize=(4,0.75*4))
         df_master.plot(x='t', y=[relax], 
             ax=ax1, logx=True, logy=True, color=['k'])
         df_dis.plot(x='t', y=[relax], label = ['tau_i'], 
@@ -411,28 +411,27 @@ def E_freq_norm(omega, alpha_i, tau_i):
     numpy.ndarray
         Concatenated array of normalized storage and loss modulus values.
     """
-    A = (omega*tau_i[:,None])
+    A = omega*tau_i[:,None]
     A2 = A**2
     E_stor = 1-np.sum(alpha_i) + np.dot(alpha_i, A2/(A2+1))
     E_loss = np.dot(alpha_i, A/(A2+1))
     return np.concatenate((E_stor, E_loss))
 
 
-def fit_freq(df_dis, df_master=None, opt=False):
+def fit_freq(df_dis, df_master, opt=False):
     """
     Fit Prony series parameter in frequency domain.
 
-    A generalized collocation method using stiffness matrices is used [1]. 
-    This methods utilizes both the storage and loss modulus master curves to 
-    estimate the Prony series parameters.
+    A least-squares minimization is performed using the L-BFGS-B method from 
+    the scipy package. The implementation is similar to the optimization problem 
+    described by [1] for a homogenous distribution of discrete times. 
 
     Parameters
     ----------
     df_dis : pandas.DataFrame
         Contains the discrete relaxation times and corresponding data.
-    df_master : pandas.DataFrame, default = None
-        Contains the master curve data. Only required for Prone term 
-        minimization routine (opt = True).
+    df_master : pandas.DataFrame
+        Contains the master curve data.
     opt : bool, default = False
         Flag indicates wether the Prony term minimization routine should be 
         executed or not.
@@ -444,37 +443,72 @@ def fit_freq(df_dis, df_master=None, opt=False):
 
     References
     ----------
-    [1] Kraus, M. A., and M. Niederwald. "Generalized collocation method using 
-    Stiffness matrices in the context of the Theory of Linear viscoelasticity 
-    (GUSTL)." Technische Mechanik-European Journal of Engineering Mechanics 
-    37.1 (2017): 82-106.
+    [1] Barrientos, E., Pelayo, F., Noriega, Á. et al. Optimal discrete-time 
+    Prony series fitting method for viscoelastic materials. Mech Time-Depend 
+    Mater 23, 193-206 (2019). https://doi.org/10.1007/s11043-018-9394-z
     """
-    modul = df_dis.modul
-    stor = '{}_stor'.format(modul)
-    loss = '{}_loss'.format(modul)
-    inst_mod = '{}_0'.format(modul)
-    rel_mod = '{}_i'.format(modul)
+    m = df_dis.modul
+    stor = '{}_stor'.format(m)
+    loss = '{}_loss'.format(m)
+    inst_mod = '{}_0'.format(m)
+    rel_mod = '{}_i'.format(m)
 
-    #Assembly 'K_global' matrix [Kraus 2017, Eq. 22]
-    N = df_dis.nprony 
-    K_stor = np.tril(np.ones((N,N)), -1) + np.diag([0.5] * N)
-    K_loss = (np.diag([0.5] * N) 
-        + np.diag([0.1] * (N-1), 1) + np.diag([0.1] * (N-1), -1) 
-        + np.diag([0.01] * (N-2), 2) + np.diag([0.01] * (N-2), -2)
-        + np.diag([0.001] * (N-3), 3) + np.diag([0.001] * (N-3), -3))
-    K_global = np.vstack([K_stor, K_loss, np.ones((1,N))])
+    #Initial guess: alpha_i = 1
+    alpha_i = np.ones(df_dis['tau_i'].values.shape)
+    tau_i = df_dis['tau_i'].values
 
-    #Estimate instantenous (E_0) and equilibrium (E_inf) modulus
+    #Estimate instantaneous (E_0) and equilibrium (E_inf) modulus
     E_0 = df_dis.E_0
-    E_inf = df_dis.E_inf
 
-    #Assembly right-hand vector
-    E = np.concatenate((df_dis[stor]/(E_0-E_inf), 
-                        df_dis[loss]/(E_0-E_inf), 
-                        np.array([1])))
+    #Get measurement data
+    E_freq_meas = np.concatenate((df_master[stor]/E_0, 
+                                    df_master[loss]/E_0))
+    omega_meas = df_master['omega'].values
 
-    #Solve equation system
-    alpha_i, err = nnls(K_global, E)
+    #Get Prony series
+    tau_i = df_dis['tau_i'].values
+    x0 = np.hstack((alpha_i, tau_i))
+
+    #Define bounds
+    bnd_a = ((0,1),)*alpha_i.shape[0]
+
+    #Perform minimization to obtain alpha_i
+    res = minimize(ls_res(E_freq_norm), alpha_i, 
+        args=(tau_i, E_freq_meas, omega_meas), method='L-BFGS-B', bounds=bnd_a)
+    alpha_i = res.x
+    err = res.fun
+
+    ###############################################################################
+    # DEPRECATED - Error gets large for certain viscoelastic materials
+    ###############################################################################
+    # A generalized collocation method using stiffness matrices is used [1]. 
+    # This methods utilizes both the storage and loss modulus master curves to 
+    # estimate the Prony series parameters.
+
+    # References
+    # ----------
+    # [1] Kraus, M. A., and M. Niederwald. "Generalized collocation method using 
+    # Stiffness matrices in the context of the Theory of Linear viscoelasticity 
+    # (GUSTL)." Technische Mechanik-European Journal of Engineering Mechanics 
+    # 37.1 (2017): 82-106.
+
+    # #Assembly 'K_global' matrix [Kraus 2017, Eq. 22]
+    # N = df_dis.nprony 
+    # K_stor = np.tril(np.ones((N,N)), -1) + np.diag([0.5] * N)
+    # K_loss = (np.diag([0.5] * N) 
+    #     + np.diag([0.1] * (N-1), 1) + np.diag([0.1] * (N-1), -1) 
+    #     + np.diag([0.01] * (N-2), 2) + np.diag([0.01] * (N-2), -2)
+    #     + np.diag([0.001] * (N-3), 3) + np.diag([0.001] * (N-3), -3))
+    # K_global = np.vstack([K_stor, K_loss, np.ones((1,N))])
+
+    # #Assembly right-hand vector
+    # E = np.concatenate((df_dis[stor]/(E_0-E_inf), 
+    #                     df_dis[loss]/(E_0-E_inf), 
+    #                     np.array([1])))
+
+    # #Solve equation system
+    # alpha_i, err = nnls(K_global, E)
+    ################################################################################
 
     #Use initial fit and try to optimize both alpha_i and tau_i
     if opt:
@@ -490,8 +524,7 @@ def fit_freq(df_dis, df_master=None, opt=False):
         #Define bounds
         tau_max = 1/(2*np.pi*df_dis.f_min)
         tau_min = 1/(2*np.pi*df_dis.f_max)
-        #bnd_t = ((tau_min, tau_max),)*alpha_i.shape[0]
-        bnd_t = tuple(zip(df_dis['tau_i'], df_dis['tau_i'])) #TODO: fix optimization
+        bnd_t = ((tau_min, tau_max),)*alpha_i.shape[0]
         bnd_a = ((0,1),)*alpha_i.shape[0]
         bnd = bnd_a + bnd_t
 
@@ -530,7 +563,7 @@ def fit_freq(df_dis, df_master=None, opt=False):
     #Store Prony parameters in dictionary
     prony = {'E_0':E_0, 'df_terms':df_prony, 'f_min':df_dis.f_min, 
         'f_max':df_dis.f_max, 'label':'equi.', 'err' : err, 
-        'decades':df_dis.decades, 'modul':modul}
+        'decades':df_dis.decades, 'modul':m}
     return prony
 
 
@@ -685,6 +718,7 @@ def GMaxw_temp(shift_func, df_GMaxw, df_coeff, df_aT, freq = [1E-8, 1E-4, 1E0, 1
             
     df_GMaxw_temp = df_GMaxw_temp.reset_index(drop=True)
     df_GMaxw_temp.modul = modul
+    df_GMaxw_temp.domain = df_GMaxw.domain
     return df_GMaxw_temp
 
 
@@ -711,19 +745,26 @@ def plot_GMaxw(df_GMaxw, units):
     loss = '{}_loss'.format(modul)
     relax = '{}_relax'.format(modul)
 
-    fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
-    df_GMaxw.plot(x='f', y=[stor],  
-            ax=ax1, logx=True, logy=True, ls='-', lw=2, color=['C0'])
-    df_GMaxw.plot(x='f', y=[loss],  
-            ax=ax2, logx=True, logy=True, ls=':', lw=2, color=['C1'])
-    df_GMaxw.plot(x='f', y=[relax], 
-            ax=ax1, logx=True, logy=True, ls='--', lw=2, color=['C2'])
-    ax1.set_xlabel('Frequency (Hz)')
-    ax1.set_ylabel('Relaxation and \nstorage modulus ({})'.format(units[stor]))
-    ax2.set_xlabel('Frequency (Hz)')
-    ax2.set_ylabel('Loss modulus ({})'.format(units[stor])) 
-    ax1.legend()
-    ax2.legend()
+    if df_GMaxw.domain == 'freq':
+        fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
+        df_GMaxw.plot(x='f', y=[stor], label=["{}'".format(modul)],
+                ax=ax1, logx=True, logy=True, ls='-', lw=2, color=['C0'])
+        df_GMaxw.plot(x='f', y=[loss], label=["{}''".format(modul)],
+                ax=ax2, logx=True, logy=True, ls=':', lw=2, color=['C1'])
+        ax1.set_xlabel('Frequency (Hz)')
+        ax1.set_ylabel('Storage modulus ({})'.format(units[stor]))
+        ax2.set_xlabel('Frequency (Hz)')
+        ax2.set_ylabel('Loss modulus ({})'.format(units[stor])) 
+        ax1.legend()
+        ax2.legend()
+    elif df_GMaxw.domain == 'time':
+        fig, ax1 = plt.subplots(figsize=(4,0.75*4))
+        df_GMaxw.plot(x='t', y=[relax], 
+                ax=ax1, logx=True, logy=True, ls='--', lw=2, color=['C2'],
+                label=["{}(t)".format(modul)],)
+        ax1.set_xlabel('Time ({})'.format(units['t']))
+        ax1.set_ylabel('Relaxation modulus ({})'.format(units[relax])) 
+        ax1.legend()
     fig.show()
     return fig
     
@@ -752,18 +793,27 @@ def plot_GMaxw_temp(df_GMaxw_temp, units):
     loss = '{}_loss'.format(modul)
     relax = '{}_relax'.format(modul)
 
-    fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
-    for i, (f, df) in enumerate(df_GMaxw_temp.groupby('f')):
-        df.plot(y=stor, x='T', ls='-', ax=ax1, logy=True, label='f = {:.0e} Hz'.format(f), 
-            c='C{}'.format(i))
-        df.plot(y=loss, x='T', ls=':', ax=ax2, logy=True, label='f = {:.0e} Hz'.format(f), c='C{}'.format(i))
-        df.plot(y=relax, x='T', ls='--', ax=ax1, logy=True, c='C{}'.format(i), label='') 
-    ax1.set_xlabel('Temperature ({})'.format(units['T']))
-    ax1.set_ylabel('Relaxation and \nstorage modulus ({})'.format(units[stor]))
-    ax2.set_xlabel('Temperature ({})'.format(units['T']))
-    ax2.set_ylabel('Loss modulus ({})'.format(units[stor])) 
-    ax1.legend()
-    ax2.legend()
+    if df_GMaxw_temp.domain == 'freq':
+        fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
+        for i, (f, df) in enumerate(df_GMaxw_temp.groupby('f')):
+            df.plot(y=stor, x='T', ls='-', ax=ax1, logy=True, 
+                    label='f = {:.0e} Hz'.format(f), c='C{}'.format(i))
+            df.plot(y=loss, x='T', ls=':', ax=ax2, logy=True, 
+                    label='f = {:.0e} Hz'.format(f), c='C{}'.format(i))
+        ax1.set_xlabel('Temperature ({})'.format(units['T']))
+        ax1.set_ylabel('Storage modulus ({})'.format(units[stor]))
+        ax2.set_xlabel('Temperature ({})'.format(units['T']))
+        ax2.set_ylabel('Loss modulus ({})'.format(units[stor])) 
+        ax1.legend(fontsize=7)
+        ax2.legend(fontsize=7)
+    elif df_GMaxw_temp.domain == 'time':
+        fig, ax1 = plt.subplots(figsize=(4,0.75*4))
+        for i, (f, df) in enumerate(df_GMaxw_temp.groupby('f')):
+            df.plot(y=relax, x='T', ls='--', ax=ax1, logy=True, c='C{}'.format(i), 
+                label='t = {:.0e} s'.format(1/f))
+        ax1.set_xlabel('Temperature ({})'.format(units['T']))
+        ax1.set_ylabel('Relaxation modulus ({})'.format(units[relax])) 
+        ax1.legend(fontsize=7)
     fig.show()
     return fig
 
@@ -843,8 +893,9 @@ def fit(df_dis, df_master=None, opt=False):
     if df_dis.domain == 'freq':
         prony = fit_freq(df_dis, df_master, opt)
     elif df_dis.domain == 'time':
-        prony = fit_time(df_dis, df_master)
+        prony = fit_time(df_dis, df_master, opt)
     df_GMaxw = calc_GMaxw(**prony)
+    df_GMaxw.domain = df_dis.domain
     return prony, df_GMaxw
 
 
@@ -875,31 +926,31 @@ def plot_fit(df_master, df_GMaxw, units):
 
     if df_master.domain == 'freq':
         fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8,0.75*4))
+        df_master.plot(x='f', y=[stor], label=["{}'(filter)".format(modul)],
+            ax=ax1, logx=True, logy=True, color=['C0'], 
+            alpha=0.5, ls='', marker='o', markersize=3)
+        df_master.plot(x='f', y=[loss], label=["{}''(filter)".format(modul)],
+            ax=ax2, logx=True, logy=True, color=['C1'], 
+            alpha=0.5, ls='', marker='o', markersize=3)
+        df_GMaxw.plot(x='f', y=[stor], label=["Prony fit"],
+            ax=ax1, logx=True, logy=True, ls='-', lw=2, color=['C0'])
+        df_GMaxw.plot(x='f', y=[loss], label=["Prony fit"],
+            ax=ax2, logx=True, logy=True, ls='-', lw=2, color=['C1'])
         ax1.set_xlabel('Frequency (Hz)')
         ax1.set_ylabel('Storage modulus ({})'.format(units[stor]))
         ax2.set_xlabel('Frequency (Hz)')
         ax2.set_ylabel('Loss modulus ({})'.format(units[stor])) 
-        df_master.plot(x='f', y=[stor], 
-            ax=ax1, logx=True, logy=True, color=['C0'], 
-            alpha=0.5, ls='', marker='o', markersize=3)
-        df_master.plot(x='f', y=[loss], 
-            ax=ax2, logx=True, logy=True, color=['C1'], 
-            alpha=0.5, ls='', marker='o', markersize=3)
-        df_GMaxw.plot(x='f', y=[stor], 
-            ax=ax1, logx=True, logy=True, ls='-', lw=2, color=['C0'])
-        df_GMaxw.plot(x='f', y=[loss], 
-            ax=ax2, logx=True, logy=True, ls='-', lw=2, color=['C1'])
         ax1.legend()
-        fig.show()
-        return fig
+        ax2.legend()
     elif df_master.domain == 'time':
-        fig, ax1 = plt.subplots()
+        fig, ax1 = plt.subplots(figsize=(4,0.75*4))
         df_master.plot(x='t', y=[relax], ax=ax1, logx=True, logy=True, 
-            color=['gray'], ls='', marker='o', markersize=3)
-        df_GMaxw.plot(x='t', y=[relax], label=['fit'], ax=ax1, 
+            color=['gray'], ls='', marker='o', markersize=3,
+            label=["{}(filter)".format(modul)])
+        df_GMaxw.plot(x='t', y=[relax], ax=ax1, label=['Prony fit'],
             logx=True, logy=True, ls='-', lw=2, color=['r'])
         ax1.set_xlabel('Time ({})'.format(units['t']))
         ax1.set_ylabel('Relaxation modulus ({})'.format(units[relax])) 
         ax1.legend()
-        fig.show()
-        return fig
+    fig.show()
+    return fig
