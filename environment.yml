@@ -2,24 +2,17 @@ name: env-pyvisco
 channels:
   - default
 dependencies:
-  - python=3.10.9=h966fe2a_0
-  - matplotlib=3.6.2=py310haa95532_0
-  - matplotlib-base=3.6.2=py310h1094b8e_0
-  - matplotlib-inline=0.1.6=py310haa95532_0
-  - numpy=1.21.5=py310h6d2d95c_3
-  - pandas=1.5.2=py310h4ed8f06_0
-  - scipy=1.9.3=py310h86744a3_0
-  - ipykernel=6.19.2=py310h9909e9c_0
-  - ipython=7.31.1=py310haa95532_1
-  - ipython_genutils=0.2.0=pyhd3eb1b0_1
-  - ipywidgets=7.6.5=pyhd3eb1b0_1
-  - xlrd=2.0.1=pyhd3eb1b0_0
-  - markdown=3.4.1=py310haa95532_0
+  - python
+  - matplotlib
+  - numpy
+  - pandas
+  - scipy=1.8.1
+  - ipykernel
+  - ipython
+  - ipywidgets=7.6.5
+  - xlrd
+  - markdown
   - pip:
-    - ipympl==0.9.3
-    - jupyter-client==7.4.1
-    - qstylizer==0.2.2
-    - qtawesome==1.2.2
+    - ipympl
     - voila==0.4.0
-    - websockets==10.4
   
