@@ -4,12 +4,12 @@ channels:
   - default
 dependencies:
   - matplotlib
-  - numpy
-  - pandas
-  - scipy
+  - numpy=1.21.5
+  - pandas=1.5.2
+  - scipy=1.9.3
   - ipython
-  - ipywidgets <8.0.0
-  - ipympl
+  - ipywidgets=7.6.5
+  - ipympl=0.9.3
   - voila
   - xlrd
   - markdown
