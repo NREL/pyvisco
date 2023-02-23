@@ -305,12 +305,23 @@ class Widgets():
             style = {'description_width' : 'initial'})
         self.cb_ManShift.observe(self.show_manual_shift, 'value')
 
+        #Show details of shift algorithm
+        self.cb_DebugShift = widgets.Checkbox(
+            value=False, 
+            description='show details of shift algorithm',
+            disabled=True,
+            indent = True,
+            layout = widgets.Layout(height = _height, width = _width),
+            style = {'description_width' : 'initial'})
+        self.cb_DebugShift.observe(self.show_shift_debug, 'value')
+
         #Out shift factors
         self.out_aT = widgets.Output()
         self.out_aT_man = widgets.Output()
+        self.out_aT_debug = widgets.Output()
 
         #Layout
-        _aT = widgets.HBox([self.cb_aT, self.cb_ManShift],
+        _aT = widgets.HBox([self.cb_aT, self.cb_ManShift, self.cb_DebugShift],
             layout = widgets.Layout(**_layout_around))
         _aT_b = widgets.HBox([self.b_aT],  
             layout = widgets.Layout(**_layout_around))
@@ -318,7 +329,9 @@ class Widgets():
             layout = widgets.Layout(**_layout_around))
         _aT_out_man = widgets.HBox([self.out_aT_man],  
             layout = widgets.Layout(**_layout_around))
-        self.w_aT = widgets.VBox([_aT, _aT_b, _aT_out, _aT_out_man])
+        _aT_out_debug = widgets.HBox([self.out_aT_debug],  
+            layout = widgets.Layout(**_layout_around))
+        self.w_aT = widgets.VBox([_aT, _aT_b, _aT_out, _aT_out_man, _aT_out_debug])
 
 
         #Shift functions
@@ -535,6 +548,16 @@ class Widgets():
     Optional section - Manual shifting
     ----------------------------------------------------------------------------
     """
+    def show_shift_debug(self, change):
+        #Display optional section
+        with self.out_aT_debug:
+            if change['new'] == True:
+                clear_output()
+                master.plot_shift_debug(self.dshift)
+            else:
+                clear_output()
+    
+    
     def show_manual_shift(self, change):
         _layout = {'width' : '100%', 'justify_content' : 'space-between'}
 
@@ -643,6 +666,8 @@ class Control(Widgets):
             clear_output()
         with self.out_aT_man:
             clear_output()
+        with self.out_aT_debug:
+            clear_output()
         with self.out_shift:
             clear_output()
         with self.out_smooth:
@@ -669,6 +694,8 @@ class Control(Widgets):
         #Set default widget configuration
         self.cb_ManShift.value = False
         self.cb_ManShift.disabled = True
+        self.cb_DebugShift.value = False
+        self.cb_DebugShift.disabled = True
         self.v_modulus.value = False
         self.v_aT.value = False
         self.v_WLF.value = False
@@ -937,6 +964,9 @@ class Control(Widgets):
         """
         Execute interactive routine to fit shift factors.
         """
+        self.cb_ManShift.value = False
+        self.cb_DebugShift.value = False
+
         with self.out_aT:
             clear_output()
             display(self.w_loading)
@@ -944,9 +974,9 @@ class Control(Widgets):
             #Fit shift factors if not present or overwrite
             #if not isinstance(self.df_aT, pd.DataFrame) or self.cb_aT.value:
             if not self.cb_shift.value:
-                self.df_aT = master.get_aT(self.df_raw, self.RefT)
+                self.df_aT, self.dshift = master.get_aT(self.df_raw, self.RefT)
             elif self.cb_aT.value:
-                    self.df_aT = master.get_aT(self.df_raw, self.RefT)
+                self.df_aT, self.dshift = master.get_aT(self.df_raw, self.RefT)
 
             #Assembly master curve
             self.df_master = master.get_curve(self.df_raw, self.df_aT, self.RefT)
@@ -964,6 +994,7 @@ class Control(Widgets):
             #Update widgets
             self.b_shift.disabled = False
             self.cb_ManShift.disabled = False
+            self.cb_DebugShift.disabled = False
             # except (NameError, AttributeError):
             #         print('Raw and/or master dataframes are missing!')
 

@@ -53,7 +53,7 @@ def conventions(modul):
     conv = {'f' : ['Hz'],
             't' : ['s'],
             'omega' : ['rad/s'],
-            'T' : ['°C', 'C'],
+            'T' : ['C', '°C'],
             'tau_i' : ['s'],
             'alpha_i': ['-', ''],
             'tan_del': ['-', ''],
@@ -69,9 +69,9 @@ def conventions(modul):
             '{}_stor_filt'.format(m):  ['Pa', 'kPa', 'MPa', 'GPa'],
             '{}_loss_filt'.format(m):  ['Pa', 'kPa', 'MPa', 'GPa'],
             'Set' : ['-', ''],
-            'RefT' : ['°C', 'C'],
+            'RefT' : ['C', '°C'],
             'C1' : ['-'],
-            'C2' : ['°C', 'C']}
+            'C2' : ['C', '°C']}
     return conv
 
 

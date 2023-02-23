@@ -69,7 +69,7 @@ def pwr_x(y, a, b, e):
     """
     base = (y-e)/a
     power = 1/b
-    x = np.sign(a) * (np.abs(base)) ** (power)
+    x = np.sign(base) * (np.abs(base)) ** (power)
     return x
 
 
@@ -155,62 +155,82 @@ def fit_at_pwr(df_raw, gb_ref, gb_shift):
 
     #Check and remove first measurement point if outlier
     ref_popt_rem, ref_pcov_rem = fit_pwr(ref_xdata[1:], ref_ydata[1:]) 
-    perr = np.sqrt(np.abs(np.diag(ref_pcov)))
-    perr_rem = np.sqrt(np.abs(np.diag(ref_pcov_rem)))
-    if all(perr_rem < perr):
+    ref_perr = np.sqrt(np.abs(np.diag(ref_pcov)))
+    ref_perr_rem = np.sqrt(np.abs(np.diag(ref_pcov_rem)))
+    ref_drop_first = False
+    #if all(ref_perr_rem < ref_perr):
+    if ref_perr_rem[1] < ref_perr[1]:
         ref_popt = ref_popt_rem
         ref_xdata = ref_xdata[1:] 
         ref_ydata = ref_ydata[1:]
+        ref_drop_first = True
 
     shift_popt_rem, shift_pcov_rem = fit_pwr(shift_xdata[1:], shift_ydata[1:]) 
-    perr = np.sqrt(np.abs(np.diag(shift_pcov)))
-    perr_rem = np.sqrt(np.abs(np.diag(shift_pcov_rem)))
-    if all(perr_rem < perr):
+    shift_perr = np.sqrt(np.abs(np.diag(shift_pcov)))
+    shift_perr_rem = np.sqrt(np.abs(np.diag(shift_pcov_rem)))
+    shift_drop_first = False
+    #if all(shift_perr_rem < shift_perr):
+    if shift_perr_rem[1] < shift_perr[1]:
         shift_popt = shift_popt_rem
         shift_xdata = shift_xdata[1:] 
         shift_ydata = shift_ydata[1:]
+        shift_drop_first = True
 
     #Calculate fit
     ref_ydata_fit = pwr_y(ref_xdata, *ref_popt)
     shift_ydata_fit = pwr_y(shift_xdata, *shift_popt)
 
     #Get interpolation or extrapolation range
-    if ref_ydata_fit.max() > shift_ydata_fit.max():
+    if (ref_ydata_fit.max() > shift_ydata_fit.max() and
+        ref_ydata_fit.min() > shift_ydata_fit.min()):
         #Ref is on top
         top_xdata = ref_xdata
-        top_ydata = ref_ydata
+        top_ydata = ref_ydata_fit
         top_popt = ref_popt
         bot_xdata = shift_xdata
-        bot_ydata = shift_ydata
+        bot_ydata = shift_ydata_fit
         bot_popt = shift_popt
         sign = 1
-    else:
+    elif(ref_ydata_fit.max() < shift_ydata_fit.max() and
+         ref_ydata_fit.min() < shift_ydata_fit.min()):
         #Shift is on top
         top_xdata = shift_xdata
-        top_ydata = shift_ydata   
+        top_ydata = shift_ydata_fit   
         top_popt = shift_popt
         bot_xdata = ref_xdata
-        bot_ydata = ref_ydata
+        bot_ydata = ref_ydata_fit
         bot_popt = ref_popt
         sign = -1
-        
+    else:
+        #Ref and Shift are intersecting
+        if ref_ydata_fit.max() > shift_ydata_fit.max():
+            top_xdata = shift_xdata
+            top_ydata = shift_ydata_fit   
+            top_popt = shift_popt
+            bot_xdata = ref_xdata
+            bot_ydata = ref_ydata_fit
+            bot_popt = ref_popt
+            sign = -1
+        else:
+            top_xdata = ref_xdata
+            top_ydata = ref_ydata_fit
+            top_popt = ref_popt
+            bot_xdata = shift_xdata
+            bot_ydata = shift_ydata_fit
+            bot_popt = shift_popt
+            sign = 1
+
     if top_ydata.min() < bot_ydata.max():
         #overlap range
-        #ymin = top_ydata.min()
-        #ymax = bot_ydata.max()
-        ymin = np.quantile(top_ydata, 0.5)
-        ymax = np.quantile(bot_ydata, 0.5)
+        ymin = top_ydata.min()
+        ymax = bot_ydata.max()
     else:
         #gap range
-        #ymin = bot_ydata.max()
-        #ymax = top_ydata.min()   
-        ymin = np.quantile(bot_ydata, 0.5)
-        ymax = np.quantile(top_ydata, 0.5)
+        ymin = bot_ydata.max()
+        ymax = top_ydata.min()   
         
     #Define three points along inter/extrapolation range
-    #ymid = (ymin+ymax)/2
-    #y = np.array([ymin, ymid, ymax])
-    y = np.linspace(ymin, ymax, 3)
+    y = np.linspace(ymin, ymax, 10)
 
     #Compute average shift factor for the three points
     x_top = pwr_x(y, *top_popt)
@@ -218,7 +238,29 @@ def fit_at_pwr(df_raw, gb_ref, gb_shift):
 
     #Calculate shift factor
     log_aT = sign * np.log10(x_top/x_bot).mean()
-    return log_aT
+
+    #Collect data to debug shift algorithm
+    dshift = {'ref_xdata':ref_xdata, 
+              'ref_ydata':ref_ydata,
+              'ref_ydata_fit':ref_ydata_fit, 
+              'shift_xdata':shift_xdata, 
+              'shift_ydata':shift_ydata,
+              'shift_ydata_fit':shift_ydata_fit,
+              'x_top' : x_top,
+              'x_bot' : x_bot,
+              'y' : y,
+              'log_aT': log_aT,
+              'shifted_xdata':10**log_aT*shift_xdata,
+              'ref_drop_first':ref_drop_first,
+              'shift_drop_first':shift_drop_first,
+              'ref_perr' : ref_perr,
+              'ref_perr_rem' : ref_perr_rem,
+              'shift_perr' : shift_perr,
+              'shift_perr_rem' : shift_perr_rem}
+
+    return log_aT, dshift 
+
+
 
 
 def get_aT(df_raw, RefT):
@@ -262,14 +304,21 @@ def get_aT(df_raw, RefT):
     #Set shift factor at RefT
     df_aT.loc[idx]['log_aT'] = 0
 
+    #Create debug data dictionary
+    dshift ={}
+
     #Shift below RefT
     for i in range(idx, 0, -1):
-        df_aT.loc[i-1]['log_aT'] = fit_at_pwr(df_raw, i, i-1) + df_aT.loc[i]['log_aT']
+        log_aT, shift = fit_at_pwr(df_raw, i, i-1) 
+        df_aT.loc[i-1]['log_aT'] = log_aT + df_aT.loc[i]['log_aT']
+        dshift[df_aT.loc[i-1]['T']] = shift
         
     #Shift above RefT
     for i in range(idx, df_aT.shape[0]-1, 1):
-        df_aT.loc[i+1]['log_aT'] = fit_at_pwr(df_raw, i, i+1) + df_aT.loc[i]['log_aT']
-    return df_aT
+        log_aT, shift = fit_at_pwr(df_raw, i, i+1) 
+        df_aT.loc[i+1]['log_aT'] = log_aT + df_aT.loc[i]['log_aT']
+        dshift[df_aT.loc[i+1]['T']] = shift
+    return df_aT, dshift
 
 
 def get_curve(df_raw, df_aT, RefT):
@@ -656,3 +705,55 @@ def plot_smooth(df_master, units):
         ax1.legend()
         fig.show()
         return fig
+    
+
+def plot_shift_debug(dshift):
+    """
+    Plot shifted measurement sets. Helpful for manual adjustment of master curve.
+   
+    Parameters
+    ----------
+    dshift : dictionary
+        Contains data of the shifted measurement sets.
+
+    Return
+    ------
+    fig : matplotlib.pyplot.figure
+        Plot displaying the fitted and shifted measurement data sets.
+    """
+    for T, shift in sorted(dshift.items()):
+        fig, (ax1, ax2) = plt.subplots(1,2, figsize=(8, 0.75*4))    
+        
+        #Input data
+        ax1.loglog(shift['ref_xdata'], shift['ref_ydata_fit'], label='ref-fit', c='k', ls='--')
+        ax1.loglog(shift['shift_xdata'], shift['shift_ydata_fit'], label='shift-fit', c='gray', ls='--')
+        
+        ax1.loglog(shift['ref_xdata'], shift['ref_ydata'], label='ref-data', c='k', ls='', marker='x', markersize=5)
+        ax1.loglog(shift['shift_xdata'], shift['shift_ydata'], label='shift-data', c='gray', ls='', marker='x', markersize=5)
+        
+        ax1.loglog(shift['x_bot'], shift['y'], label='bot dis', marker='o', c='firebrick', ls='', markersize=3)
+        ax1.loglog(shift['x_top'], shift['y'], label='top dis', marker='d', c='firebrick', ls='', markersize=3)
+        
+        #Shifted data
+        ax2.loglog(shift['ref_xdata'], shift['ref_ydata_fit'], label='ref-fit', c='k', ls='--')
+        ax2.loglog(shift['ref_xdata'], shift['ref_ydata'], label='ref-data', c='k', ls='', marker='x', markersize=5)
+        
+        ax2.loglog(shift['shifted_xdata'], shift['shift_ydata'], label='shift-data', c='gray', ls='', marker='x', markersize=5)
+        ax2.loglog(shift['shifted_xdata'], shift['shift_ydata_fit'], label='shift-fit', c='gray', ls='--')
+        
+        ax1.legend(fontsize=7)
+        ax2.legend(fontsize=7)
+        fig.suptitle('Shift data set at T = {}°C'.format(T), fontsize=10)
+        ax1.set_title('measurement set', fontsize=8)
+        ax2.set_title('shifted set'.format(T), fontsize=8)
+        fig.show()
+        
+        #First data point dropped?
+        print('ref-drop-first: {} | perr: {} | perr_rem : {}'.format(
+            shift['ref_drop_first'], 
+            np.array2string(shift['ref_perr'], precision=2, separator=','), 
+            np.array2string(shift['ref_perr_rem'], precision=2, separator=',')))
+        print('shift-drop-first: {} | perr: {} | perr_rem : {}'.format(
+            shift['shift_drop_first'],
+            np.array2string(shift['shift_perr'], precision=2, separator=','), 
+            np.array2string(shift['shift_perr_rem'], precision=2, separator=',')))
