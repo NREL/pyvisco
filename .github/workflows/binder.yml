@@ -29,3 +29,4 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_NREL_TOKEN }}
         BINDER_CACHE: true
         PUBLIC_REGISTRY_CHECK: true
+        MYBINDERORG_TAG: ${{ github.event.ref }}
