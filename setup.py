@@ -7,26 +7,28 @@ except ImportError:
 
 import versioneer
 
-DESCRIPTION = ('Pyvisco is a Python library that supports Prony series ' + 
-               'identification for linear viscoelastic material models.')
+DESCRIPTION = (
+    "Pyvisco is a Python library that supports Prony series "
+    + "identification for linear viscoelastic material models."
+)
 
 LONG_DESCRIPTION = """
-Pyvisco is a Python library that supports the identification of Prony series 
-parameters for linear viscoelastic materials described by a Generalized Maxwell 
-model. The necessary material model parameters are identified by fitting a Prony 
-series to the experimental measurement data in either the frequency-domain 
-(via Dynamic Mechanical Thermal Analysis) or time-domain (via relaxation 
-measurements). Pyvisco performs the necessary data processing of the 
-experimental measurements, mathematical operations, and curve-fitting routines 
-to identify the Prony series parameters. These parameters are used in subsequent 
-Finite Element simulations involving linear viscoelastic material models that 
-accurately describe the mechanical behavior of polymeric materials such as 
-encapsulants and backsheets of PV modules. An optional minimization routine is 
-included to reduce the number of Prony elements. This routine is helpful in 
-large Finite Element simulations where reducing the computational complexity of 
+Pyvisco is a Python library that supports the identification of Prony series
+parameters for linear viscoelastic materials described by a Generalized Maxwell
+model. The necessary material model parameters are identified by fitting a Prony
+series to the experimental measurement data in either the frequency-domain
+(via Dynamic Mechanical Thermal Analysis) or time-domain (via relaxation
+measurements). Pyvisco performs the necessary data processing of the
+experimental measurements, mathematical operations, and curve-fitting routines
+to identify the Prony series parameters. These parameters are used in subsequent
+Finite Element simulations involving linear viscoelastic material models that
+accurately describe the mechanical behavior of polymeric materials such as
+encapsulants and backsheets of PV modules. An optional minimization routine is
+included to reduce the number of Prony elements. This routine is helpful in
+large Finite Element simulations where reducing the computational complexity of
 the linear viscoelastic material models can shorten the simulation time.
 
-Documentation: https://pyvisco.readthedocs.io  
+Documentation: https://pyvisco.readthedocs.io
 Source code: https://github.com/NREL/pyvisco
 """
 
@@ -53,7 +55,8 @@ INSTALL_REQUIRES = [
 ]
 
 DOCS_REQUIRE = [
-    'sphinx == 4.3.1', 'm2r2',
+    "sphinx",
+    "m2r2",
 ]
 
 EXTRAS_REQUIRE = {
