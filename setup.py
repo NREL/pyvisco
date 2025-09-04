@@ -55,7 +55,7 @@ INSTALL_REQUIRES = [
 ]
 
 DOCS_REQUIRE = [
-    "sphinx",
+    "sphinx>=6.0,<8.0",
     "m2r2",
 ]
 
