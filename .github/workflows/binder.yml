@@ -1,32 +1,59 @@
-name: Binder
-on: [push]
+name: Binder Image Build
 
-# Cache on mybinder.org
-# jobs:
-#   Create-MyBinderOrg-Cache:
-#     runs-on: ubuntu-latest
-#     steps:
-#     - name: cache binder build on mybinder.org
-#       uses: jupyterhub/repo2docker-action@master
-#       with:
-#         NO_PUSH: true
-#         MYBINDERORG_TAG: ${{ github.event.ref }} # This builds the container on mybinder.org with the branch that was pushed on.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.ipynb'
+      - 'environment.yml'
+      - 'requirements.txt'
+      - 'Dockerfile'
+      - 'binder/**'
+      - '.github/workflows/binder.yml'
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 5 * * 1'  # Weekly rebuild (Mondays 05:00 UTC) to keep Binder cache warm
 
-# Push to dockerhub
+permissions:
+  contents: read
+
+concurrency:
+  group: binder-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   binder:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v5
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
+      - name: Checkout
+        uses: actions/checkout@v5
 
-    - name: update jupyter dependencies with repo2docker
-      uses: jupyterhub/repo2docker-action@master
-      with:
-        DOCKER_USERNAME: ${{ secrets.DOCKERHUB_NREL_USER }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_NREL_TOKEN }}
-        BINDER_CACHE: true
-        PUBLIC_REGISTRY_CHECK: true
-        MYBINDERORG_TAG: ${{ github.event.ref }}
+      - name: Derive tag
+        id: meta
+        run: |
+          # Prefer a shortened SHA for cache tagging; include date for readability
+            SHORT_SHA="${GITHUB_SHA::7}"
+            DATE=$(date -u +%Y%m%d)
+            echo "tag=${SHORT_SHA}-${DATE}" >> $GITHUB_OUTPUT
+
+      - name: Build (repo2docker) & optionally push
+        # TODO: Pin to a stable tag or commit SHA for reproducibility; using floating @master for now.
+        uses: jupyterhub/repo2docker-action@master
+        with:
+          # Pushing only works if secrets are provided; otherwise it will just build.
+          DOCKER_USERNAME: ${{ secrets.DOCKERHUB_NREL_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_NREL_TOKEN }}
+          BINDER_CACHE: true
+          PUBLIC_REGISTRY_CHECK: true
+          MYBINDERORG_TAG: ${{ steps.meta.outputs.tag }}
+        env:
+          # Avoid accidental push if credentials missing
+          R2D_GIT_CLONE_ARGS: --depth=1
+
+      - name: Summary
+        run: |
+          echo "Binder image build completed with tag: ${{ steps.meta.outputs.tag }}"
+          if [ -z "${{ secrets.DOCKERHUB_NREL_USER }}" ]; then
+            echo "(No Docker Hub credentials supplied; image not pushed.)"
+          fi
