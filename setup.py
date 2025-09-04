@@ -57,6 +57,7 @@ INSTALL_REQUIRES = [
 DOCS_REQUIRE = [
     "sphinx>=6.0,<8.0",
     "docutils==0.18.1",
+    "mistune<2.0",
     "m2r2",
 ]
 
