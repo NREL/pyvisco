@@ -13,7 +13,7 @@ from scipy.optimize import curve_fit
 def WLF(Temp, RefT, WLF_C1, WLF_C2):
     """
     Calculate the Williams-Landel-Ferry (WLF) equation [1].
-    
+
     Parameters
     ----------
     Temp : numeric
@@ -30,9 +30,9 @@ def WLF(Temp, RefT, WLF_C1, WLF_C2):
 
     References
     ----------
-    [1] Williams, Malcolm L.; Landel, Robert F.; Ferry, John D. (1955). 
-    "The Temperature Dependence of Relaxation Mechanisms in Amorphous Polymers 
-    and Other Glass-forming Liquids". J. Amer. Chem. Soc. 77 (14): 3701-3707. 
+    [1] Williams, Malcolm L.; Landel, Robert F.; Ferry, John D. (1955).
+    "The Temperature Dependence of Relaxation Mechanisms in Amorphous Polymers
+    and Other Glass-forming Liquids". J. Amer. Chem. Soc. 77 (14): 3701-3707.
     doi:10.1021/ja01619a008
     """
     log_aT = -WLF_C1*(Temp - RefT)/(WLF_C2+(Temp - RefT))
@@ -42,7 +42,7 @@ def WLF(Temp, RefT, WLF_C1, WLF_C2):
 def poly1(x,C0,C1):
     """
     Calculate a polynomial function of degree 1 with a single variable 'x'.
-    
+
     Parameters
     ----------
     x : numeric
@@ -54,14 +54,14 @@ def poly1(x,C0,C1):
     -------
     numeric
         Result of the polynomial function.
-    """    
+    """
     return C0+C1*x
 
 
 def poly2(x,C0,C1,C2):
     """
     Calculate a polynomial function of degree 2 with a single variable 'x'.
-    
+
     Parameters
     ----------
     x : numeric
@@ -73,14 +73,14 @@ def poly2(x,C0,C1,C2):
     -------
     numeric
         Result of the polynomial function.
-    """   
+    """
     return C0+C1*x+C2*x**2
 
 
 def poly3(x,C0,C1,C2,C3):
     """
     Calculate a polynomial function of degree 3 with a single variable 'x'.
-    
+
     Parameters
     ----------
     x : numeric
@@ -92,14 +92,14 @@ def poly3(x,C0,C1,C2,C3):
     -------
     numeric
         Result of the polynomial function.
-    """  
+    """
     return C0+C1*x+C2*x**2+C3*x**3
 
 
 def poly4(x,C0,C1,C2,C3,C4):
     """
     Calculate a polynomial function of degree 4 with a single variable 'x'.
-    
+
     Parameters
     ----------
     x : numeric
@@ -111,14 +111,14 @@ def poly4(x,C0,C1,C2,C3,C4):
     -------
     numeric
         Result of the polynomial function.
-    """  
+    """
     return C0+C1*x+C2*x**2+C3*x**3+C4*x**4
 
 
 def fit_WLF(RefT, df_aT):
     """
     Fit the Williams-Landel-Ferry (WLF) equation [1] to a set of shift factors.
-    
+
     Parameters
     ----------
     RefT : numeric
@@ -146,9 +146,9 @@ def fit_WLF(RefT, df_aT):
 
     References
     ----------
-    [1] Williams, Malcolm L.; Landel, Robert F.; Ferry, John D. (1955). 
-    "The Temperature Dependence of Relaxation Mechanisms in Amorphous Polymers 
-    and Other Glass-forming Liquids". J. Amer. Chem. Soc. 77 (14): 3701-3707. 
+    [1] Williams, Malcolm L.; Landel, Robert F.; Ferry, John D. (1955).
+    "The Temperature Dependence of Relaxation Mechanisms in Amorphous Polymers
+    and Other Glass-forming Liquids". J. Amer. Chem. Soc. 77 (14): 3701-3707.
     doi:10.1021/ja01619a008
     """
     xdata = df_aT['T'].values
@@ -157,7 +157,7 @@ def fit_WLF(RefT, df_aT):
     popt, _pcov = curve_fit(lambda x, C1, C2: WLF(x, RefT, C1, C2),
         xdata, ydata, p0 = [1E3, 5E3], bounds=(0, 5000))
 
-    df = pd.DataFrame(data = np.insert(popt,0,RefT)).T 
+    df = pd.DataFrame(data=np.insert(popt, 0, RefT)).T
     df.columns = ['RefT', 'C1', 'C2']
     return df
 
@@ -165,7 +165,7 @@ def fit_WLF(RefT, df_aT):
 def fit_poly(df_aT):
     """
     Fit polynomial functions of degree 1 to 4 to a set of shift factors.
-    
+
     Parameters
     ----------
     df_aT : pandas.DataFrame
@@ -175,11 +175,11 @@ def fit_poly(df_aT):
     Returns
     -------
     df_C : pandas.DataFrame
-        Contains the coefficients to calculate the polynomial 
+        Contains the coefficients to calculate the polynomial
         shift functions of degree 1 to 4 for temperatures in degree **Celsius**.
 
     df_K : pandas.DataFrame
-        Contains the coefficients to calculate the polynomial 
+        Contains the coefficients to calculate the polynomial
         shift functions of degree 1 to 4 for temperatures in **Kelvin**.
 
     Note:
@@ -187,17 +187,19 @@ def fit_poly(df_aT):
     The coefficients of the polynomial shift funtions are dependent on the
     Temperature unit. Hence, two different dataframes are provided for
     temperatures described in Celsius and Kelvin. For temperatures in Kelvin,
-    at least 5 significant figures should be used for the polynomial 
-    coefficients to obtain accurate results for the polynomial shift functions. 
+    at least 5 significant figures should be used for the polynomial
+    coefficients to obtain accurate results for the polynomial shift functions.
 
-    The interconversion from degree Celsius (T_C) to Kelvin (T_K) is performed 
+    The interconversion from degree Celsius (T_C) to Kelvin (T_K) is performed
     as: T_K = T_C + 273.15.
     """
-    #Kelvin
-    df_K = pd.DataFrame(np.zeros((5, 4)), 
-        index = ['C0', 'C1', 'C2', 'C3', 'C4'], 
-        columns=['D4', 'D3', 'D2', 'D1'],
-        dtype=float)
+    # Kelvin
+    df_K = pd.DataFrame(
+        np.zeros((5, 4)),
+        index=["C0", "C1", "C2", "C3", "C4"],
+        columns=["D4", "D3", "D2", "D1"],
+        dtype=float,
+    )
 
     xdata = df_aT['T'].values+273.15
     ydata = df_aT['log_aT'].values
@@ -207,11 +209,13 @@ def fit_poly(df_aT):
     df_K['D2'][['C0', 'C1', 'C2']], _pcov = curve_fit(poly2, xdata, ydata)
     df_K['D1'][['C0', 'C1']], _pcov = curve_fit(poly1, xdata, ydata)
 
-    #Celsius
-    df_C = pd.DataFrame(np.zeros((5, 4)), 
-    index = ['C0', 'C1', 'C2', 'C3', 'C4'], 
-    columns=['D4', 'D3', 'D2', 'D1'],
-    dtype=float)
+    # Celsius
+    df_C = pd.DataFrame(
+        np.zeros((5, 4)),
+        index=["C0", "C1", "C2", "C3", "C4"],
+        columns=["D4", "D3", "D2", "D1"],
+        dtype=float,
+    )
 
     xdata = df_aT['T'].values
     ydata = df_aT['log_aT'].values
@@ -221,25 +225,25 @@ def fit_poly(df_aT):
     df_C['D2'][['C0', 'C1', 'C2']], _pcov = curve_fit(poly2, xdata, ydata)
     df_C['D1'][['C0', 'C1']], _pcov = curve_fit(poly1, xdata, ydata)
 
-    #Prep dataframes and add units for output
+    # Prep dataframes and add units for output
     df_C = df_C.T
     df_K = df_K.T
 
     coeff_C = df_C.columns.get_level_values(0)
-    C = ['°C', '-', '°C^-1', '°C^-2', '°C^-3']
-    df_C.columns = pd.MultiIndex.from_tuples(zip(coeff_C, C), names = ['Degree', '-'])
+    C = ["-", "°C^-1", "°C^-2", "°C^-3", "°C^-4"]
+    df_C.columns = pd.MultiIndex.from_tuples(zip(coeff_C, C), names=["Degree", "-"])
 
     coeff_K = df_K.columns.get_level_values(0)
-    K = ['K', '-', 'K^-1', 'K^-2', 'K^-3']
-    df_K.columns = pd.MultiIndex.from_tuples(zip(coeff_K, K), names = ['Degree', '-'])
-    
+    K = ["-", "K^-1", "K^-2", "K^-3", "K^-4"]
+    df_K.columns = pd.MultiIndex.from_tuples(zip(coeff_K, K), names=["Degree", "-"])
+
     return df_C, df_K
 
 
 def plot(df_aT, df_WLF, df_C):
     """
     Plot shift factors and shift functions.
-    
+
     Parameters
     ----------
     df_aT : pandas.DataFrame
@@ -251,9 +255,9 @@ def plot(df_aT, df_WLF, df_C):
         equation (RefT, WLF_C1, WLF_C2) in degree Celsius.
 
     df_C : pandas.DataFrame
-        Contains the coefficients to calculate the polynomial 
+        Contains the coefficients to calculate the polynomial
         shift functions of degree 1 to 4 for temperatures in degree **Celsius**.
-    
+
     Returns
     -------
     fig : matplotlib.pyplot.figure
@@ -286,10 +290,12 @@ def plot(df_aT, df_WLF, df_C):
     ax.set_ylabel(r'$\log(a_{\mathrm{T}})$')
     ax.legend()
     fig.show()
-  
-    #Collect figure data in dataframe
-    df_shift = pd.DataFrame(np.zeros((x.shape[0], 7)), 
-        columns=(['T', 'log_aT', 'WLF', 'Poly1', 'Poly2', 'Poly3', 'Poly4']))
+
+    # Collect figure data in dataframe
+    df_shift = pd.DataFrame(
+        np.zeros((x.shape[0], 7)),
+        columns=(["T", "log_aT", "WLF", "Poly1", "Poly2", "Poly3", "Poly4"]),
+    )
     df_shift['T'] = x
     df_shift['log_aT'] = y_aT
     df_shift['WLF'] = y_WLF
