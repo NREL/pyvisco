@@ -14,5 +14,4 @@ dependencies:
   - xlrd
   - markdown
   - ipympl
-  - voila>=0.5
-  - jupyterlab_mathjax3
+  - voila
