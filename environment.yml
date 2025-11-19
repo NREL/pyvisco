@@ -15,3 +15,5 @@ dependencies:
   - markdown
   - ipympl
   - voila=0.3.6
+  - lxml_html_clean
+
