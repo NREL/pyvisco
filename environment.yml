@@ -10,9 +10,8 @@ dependencies:
   - scipy=1.8.1
   - ipykernel
   - ipython
-  - ipywidgets=8.1.*
+  - ipywidgets=7.6.5
   - xlrd
   - markdown
   - ipympl
-  - voila=0.5.*
-  - jupyterlab_widgets
+  - voila
