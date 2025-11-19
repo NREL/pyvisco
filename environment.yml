@@ -14,4 +14,4 @@ dependencies:
   - xlrd
   - markdown
   - ipympl
-  - voila
+  - voila=0.3.6
