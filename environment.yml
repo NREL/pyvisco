@@ -1,21 +1,23 @@
 name: env-pyvisco
 channels:
-  - default
   - conda-forge
 dependencies:
   - python
-  - matplotlib
-  - numpy
-  - pandas
-  - scipy=1.8.1
+  - jupyter=1.0.0
+  - matplotlib=3.5.1
+  - numpy=1.22.2
+  - pandas=1.4.1
+  - scipy=1.8.0
   - ipykernel
-  - ipython
+  - ipython=8.0.1
   - ipywidgets=7.6.5
-  - xlrd
-  - markdown
-  - ipympl
+  - ipympl=0.8.8
   - voila=0.3.6
+  - xlrd=2.0.1
+  - markdown=3.3.6
+  - jinja2=2.11.3
+  - markupsafe=2.0.1
   - pip
   - pip:
-    - lxml_html_clean
+    - lxml_html_clean==0.2.0
 
